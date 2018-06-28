@@ -7,9 +7,7 @@ This file is only supported for stable release, and does not include more recent
 (05 December 2012)
 """
 
-import sys
-import os
-
+import sys, os
 try:
     import numpy as np
 except:
@@ -21,16 +19,14 @@ try:
 except:
     print >> sys.stderr, "Usage: %s <%s> <%s>" % (sys.argv[0], "box size", "file with sequences")
     sys.exit(1)
-
-box = np.array([box_side, box_side, box_side])
+box = np.array ([box_side, box_side, box_side])
 
 try:
-    inp = open(infile, 'r')
+    inp = open (infile, 'r')
     inp.close()
 except:
     print >> sys.stderr, "Could not open file '%s' for reading. Aborting" % infile
     sys.exit(2)
-
 
 # return parts of a string
 def partition(s, d):
@@ -40,38 +36,27 @@ def partition(s, d):
     else:
         return s, "", ""
 
-
-def is_float(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
-
 # every defined macro in model.h must be imported in this module
 def import_model_constants():
-    model_file_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'model.h')
-    model_file = open(model_file_path)
-    for line in model_file.readlines():
-        line = partition(line.strip(), '//')[0].strip()
-
-        macro = partition(line, '#define ')[2].strip().split(' ', 1)
+    PI = np.pi
+    model = os.path.join(os.path.dirname(__file__), "../src/model.h")
+    f = open(model)
+    for line in f.readlines():
+        # line = line.strip().partition("//")[0].strip()
+        line = (partition (line.strip (), "//")[0]).strip ()
+        #macro = line.partition("#define ")[2].strip().split(" ", 1)
+        macro = (partition (line, "#define ")[2]).strip().split(" ", 1)
         if len(macro) > 1:
-            key, value = [x.strip() for x in macro]
-
-            # the 'f' character, needed by C to interpret numbers as floats, must be removed
-            if is_float(value.replace('f', '')):
-                value = value.replace('f', '')
-
+            key, val = [x.strip() for x in macro]
+            # the f needed by c to interpret numbers as floats must be removed
+            # this could be a source of bugs
+            val = val.replace("f", "")
             # this awful exec is needed in order to get the right results out of macro definitions
-            exec 'tmp = %s' % value
+            exec "tmp = %s" % (val)
             globals()[key] = tmp
-    model_file.close()
-
+    f.close()
 
 import_model_constants()
-
 
 CM_CENTER_DS = POS_BASE + 0.2
 BASE_BASE = 0.3897628551303122
@@ -429,4 +414,3 @@ def read_strands(filename):
 
 
 read_strands (infile)
-
