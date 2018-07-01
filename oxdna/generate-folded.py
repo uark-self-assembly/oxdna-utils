@@ -34,6 +34,7 @@ def is_float(value):
 
 # every defined macro in model.h must be imported in this module
 def import_model_constants():
+    PI = np.pi
     model_file_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'model.h')
     model_file = open(model_file_path)
     for line in model_file.readlines():
@@ -42,13 +43,8 @@ def import_model_constants():
         macro = partition(line, '#define ')[2].strip().split(' ', 1)
         if len(macro) > 1:
             key, value = [x.strip() for x in macro]
-
-            # the 'f' character, needed by C to interpret numbers as floats, must be removed
-            if is_float(value.replace('f', '')):
-                value = value.replace('f', '')
-                globals()[key] = float(value)
-            else:
-                globals()[key] = globals()[value]
+            value = value.replace('f', '')
+            globals()[key] = eval(value)
 
     model_file.close()
 
@@ -60,7 +56,7 @@ def add_strands(new_positions, new_a1s, new_a3s):
         p = positions[i]
         pa1 = a1s[i]
 
-        for j in xrange (len (new_positions)):
+        for j in xrange(len(new_positions)):
             q = new_positions[j]
             qa1 = new_a1s[j]
 
@@ -70,7 +66,7 @@ def add_strands(new_positions, new_a1s, new_a3s):
             q_pos_base = q + qa1 * POS_BASE
 
             dr = p_pos_back - q_pos_back
-            dr -= box * np.rint (dr / box)
+            dr -= box * np.rint(dr / box)
 
             if np.dot(dr, dr) < RC2_BACK:
                 overlap = True
@@ -110,7 +106,7 @@ def get_rotation_matrix(axis, anglest):
     # or a tuple [angle, units] where angle a number and
     # units is a string. It tells the routine whether to use degrees,
     # radiants (the default) or base pairs turns
-    if not isinstance (anglest, (np.float64, np.float32, float, int)):
+    if not isinstance(anglest, (np.float64, np.float32, float, int)):
         if len(anglest) > 1:
             if anglest[1] in ['degrees', 'deg', 'o']:
                 angle = (np.pi / 180.) * (anglest[0])
@@ -136,7 +132,7 @@ def get_rotation_matrix(axis, anglest):
                     [olc*x*z-st*y, olc*y*z+st*x, olc*z*z+ct]])
 
 
-class StrandGenerator (object):
+class StrandGenerator(object):
     def generate(self,
                  bp,
                  sequence=None,
@@ -169,7 +165,8 @@ class StrandGenerator (object):
         if dir_norm < 1e-10:
             print >> sys.stderr, 'direction must be a valid vector, defaulting to (0, 0, 1)'
             direction = np.array([0, 0, 1])
-        else: direction /= dir_norm
+        else:
+            direction /= dir_norm
 
         if perpendicular is None or perpendicular is False:
             v1 = np.random.random_sample(3)
@@ -183,7 +180,7 @@ class StrandGenerator (object):
         R = get_rotation_matrix(direction, [1, 'bp'])
 
         a1 = v1
-        a1 = np.dot (R0, a1)
+        a1 = np.dot(R0, a1)
         rb = np.array(start_pos)
         a3 = direction
         for i in range(bp):
@@ -240,7 +237,8 @@ def read_strands(filename):
         sys.exit(2)
 
     # get the number of strands and nucleotides
-    nstrands, nnucl = 0, 0
+    stand_count = 0
+    nucleotide_count = 0
 
     lines = infile.readlines()
     for line in lines:
@@ -249,42 +247,42 @@ def read_strands(filename):
             continue
         if line[:6] == 'DOUBLE':
             line = line.split()[1]
-            length = len(line)
-            print >> sys.stderr, '## Found duplex of %i bases' % (length)
-            nnucl += 2 * length
-            nstrands += 2
+            print >> sys.stderr, '## Found duplex of %i bases' % len(line)
+            nucleotide_count += 2 * len(line)
+            stand_count += 2
         else:
             line = line.split()[0]
             print >> sys.stderr, '## Found single strand of %i bases' % (len(line))
-            nnucl += len(line)
-            nstrands += 1
+            nucleotide_count += len(line)
+            stand_count += 1
 
     infile.seek(0)
 
-    print >> sys.stderr, '## nstrands, nnucl = ', nstrands, nnucl
+    print >> sys.stderr, '## nstrands, nnucl = ', stand_count, nucleotide_count
 
     # here we generate the topology file
     try:
-        out = open ('generated.top', 'w')
+        topology_file = open('generated.top', 'w')
     except:
         print >> sys.stderr, 'Could not open generated.top for writing. Aborting'
         sys.exit(4)
 
-    print >> out, nnucl, nstrands
-    myns, mynn = 1, 0
-    lines = infile.readlines()
+    print >> topology_file, nucleotide_count, stand_count
+
+    myns = 1
+    mynn = 0
     for line in lines:
         line = line.upper().strip()
         if len(line) == 0:
             continue
         if line[:6] == 'DOUBLE':
             line = line.split()[1].upper()
-            print >> out, myns, line[0], -1, mynn + 1
+            print >> topology_file, myns, line[0], -1, mynn + 1
             mynn += 1
-            for i in xrange (1, len(line) - 1):
-                print >> out, myns, line[i], mynn - 1, mynn + 1
+            for i in xrange(1, len(line) - 1):
+                print >> topology_file, myns, line[i], mynn - 1, mynn + 1
                 mynn += 1
-            print >> out, myns, line[-1], mynn - 1, -1
+            print >> topology_file, myns, line[-1], mynn - 1, -1
             mynn += 1
             myns += 1
 
@@ -293,32 +291,33 @@ def read_strands(filename):
             # put it back in letters
             line = [number_to_base[x] for x in seq[::-1]]
 
-            print >> out, myns, line[0], -1, mynn + 1
+            print >> topology_file, myns, line[0], -1, mynn + 1
             mynn += 1
-            for i in xrange (1, len(line) - 1):
-                print >> out, myns, line[i], mynn - 1, mynn + 1
+            for i in xrange(1, len(line) - 1):
+                print >> topology_file, myns, line[i], mynn - 1, mynn + 1
                 mynn += 1
-            print >> out, myns, line[-1], mynn - 1, -1
+            print >> topology_file, myns, line[-1], mynn - 1, -1
             mynn += 1
             myns += 1
         else:
             line = line.split()[0].upper()
-            print >> out, myns, line[0], -1, mynn + 1
+            print >> topology_file, myns, line[0], -1, mynn + 1
             mynn += 1
-            for i in xrange (1, len(line) - 1):
-                print >> out, myns, line[i], mynn - 1, mynn + 1
+            for i in xrange(1, len(line) - 1):
+                print >> topology_file, myns, line[i], mynn - 1, mynn + 1
                 mynn += 1
-            print >> out, myns, line[-1], mynn -1, -1
+            print >> topology_file, myns, line[-1], mynn - 1, -1
             mynn += 1
             myns += 1
-    out.close ()
-    infile.seek (0)
+    topology_file.close()
+    infile.seek(0)
 
     # generate the strands
-    double = StrandGenerator()
+    strand_generator = StrandGenerator()
     lines = infile.readlines()
     lines_count = len(lines)
     i = 1
+
     for line in lines:
         line = line.upper().strip()
 
@@ -333,31 +332,31 @@ def read_strands(filename):
             cdm = np.random.random_sample(3) * box
             axis = np.random.random_sample(3)
             axis /= np.sqrt(np.dot(axis, axis))
-            new_positions, new_a1s, new_a3s = double.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=True)
+            new_positions, new_a1s, new_a3s = strand_generator.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=True)
             while not add_strands(new_positions, new_a1s, new_a3s):
                 cdm = np.random.random_sample(3) * box
                 axis = np.random.random_sample(3)
                 axis /= np.sqrt(np.dot(axis, axis))
-                new_positions, new_a1s, new_a3s = double.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=True)
-            print >> sys.stderr, '##  done line %i / %i, now at %i/%i' % (i, lines_count, len(positions), nnucl)
+                new_positions, new_a1s, new_a3s = strand_generator.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=True)
+            print >> sys.stderr, '##  done line %i / %i, now at %i/%i' % (i, lines_count, len(positions), nucleotide_count)
         else:
             seq = [base_to_number[x] for x in line]
             cdm = np.random.random_sample(3) * box
             axis = np.random.random_sample(3)
             axis /= np.sqrt(np.dot(axis, axis))
             print >> sys.stderr, '## Adding single strand of %i bases' % (len(line))
-            new_positions, new_a1s, new_a3s = double.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=False)
+            new_positions, new_a1s, new_a3s = strand_generator.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=False)
             while not add_strands(new_positions, new_a1s, new_a3s):
                 cdm = np.random.random_sample(3) * box
                 axis = np.random.random_sample(3)
                 axis /= np.sqrt(np.dot(axis, axis))
-                new_positions, new_a1s, new_a3s = double.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=False)
-            print >> sys.stderr, '##  done line %i / %i, now at %i/%i' % (i, lines_count, len(positions), nnucl)
+                new_positions, new_a1s, new_a3s = strand_generator.generate(len(line), sequence=seq, direction=axis, start_pos=cdm, double_strand=False)
+            print >> sys.stderr, '##  done line %i / %i, now at %i/%i' % (i, lines_count, len(positions), nucleotide_count)
 
         i += 1
 
-    if not len(positions) == nnucl:
-        print len(positions), nnucl
+    if not len(positions) == nucleotide_count:
+        print len(positions), nucleotide_count
         raise AssertionError
 
     # here we generate the configuration file (coordinates)
@@ -370,11 +369,11 @@ def read_strands(filename):
     print >> outfile, 't = 0'
     print >> outfile, 'b = ', box_side, box_side, box_side
     print >> outfile, 'E = 0. 0. 0.'
-    for i in xrange(nnucl):
+    for i in xrange(nucleotide_count):
         print >> outfile, positions[i][0], positions[i][1], positions[i][2],
         print >> outfile, a1s[i][0], a1s[i][1], a1s[i][2],
         print >> outfile, a3s[i][0], a3s[i][1], a3s[i][2],
-        print >> outfile, 0., 0., 0., 0., 0., 0. # v and L
+        print >> outfile, 0., 0., 0., 0., 0., 0.  # v and L
 
     outfile.close()
     print >> sys.stderr, '## ALL DONE. just generated "generated.dat" and "generated.top"'
@@ -383,7 +382,7 @@ def read_strands(filename):
 ##
 #  MAIN
 ##
-if __name__ == 'main':
+if __name__ == '__main__':
     try:
         box_side = float(sys.argv[1])
         input_file_path = sys.argv[2]

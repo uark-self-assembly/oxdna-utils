@@ -30,14 +30,6 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
 # Sphinx documentation
 docs/_build/
 
@@ -82,3 +74,5 @@ pip-selfcheck.json
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
+
+output/
