@@ -13,8 +13,8 @@ def double_strands():
     s = base.System([30, 30, 30])
     s.add_strands(g.generate(10))
     s.add_strands(g.generate(10))
-    s.add_strands(g.generate(25, dir=[0, 1, 0], start_pos=[0, 0, 7], double=False))
-    s.add_strands(g.generate(25, dir=[1, 1, 1], start_pos=[-10, -10, -10]))
+    s.add_strands(g.generate(25, dir=[0, 1, 0], start_position=[0, 0, 7], double=False))
+    s.add_strands(g.generate(25, dir=[1, 1, 1], start_position=[-10, -10, -10]))
     s.print_crepy_output ("prova.mgl")
     s.print_lorenzo_output ("generated.dat", "generated.top")
 
@@ -125,7 +125,7 @@ def read_strands(filename='caca.sqs', box_side=50):
         while not success:
             if not bool_rw:
                 success = s.add_strands(double.generate(len(seq), sequence=seq, dir=axis, \
-                   start_pos=cdm, double=bool_double, circular=bool_circular), check_overlap=True)
+                                                        start_position=cdm, double=bool_double, circular=bool_circular), check_overlap=True)
             else:
                 success = s.add_strands(double.generate_rw(sequence=seq, start_pos=cdm))
             

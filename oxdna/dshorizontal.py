@@ -13,8 +13,8 @@ def double_strands():
     s = base.System([30, 30, 30])
     s.add_strands(g.generate(10))
     s.add_strands(g.generate(10))
-    s.add_strands(g.generate(25, dir=[0, 1, 0], start_pos=[0, 0, 7], double=False))
-    s.add_strands(g.generate(25, dir=[1, 1, 1], start_pos=[-10, -10, -10]))
+    s.add_strands(g.generate(25, dir=[0, 1, 0], start_position=[0, 0, 7], double=False))
+    s.add_strands(g.generate(25, dir=[1, 1, 1], start_position=[-10, -10, -10]))
     s.print_crepy_output ("prova.mgl")
     s.print_lorenzo_output ("prova.conf", "prova.top")
     
@@ -58,7 +58,7 @@ def read_strands():
             axis /= np.sqrt(np.dot(axis, axis))
             axis = np.array ([1.,0.,0])
             cdm = np.array ([0.,0.,0.])
-            while not s.add_strands(double.generate(len(line), sequence=seq, dir=axis, start_pos=cdm)):
+            while not s.add_strands(double.generate(len(line), sequence=seq, dir=axis, start_position=cdm)):
                 cdm = np.random.random_sample(3) * s._box
                 axis = np.random.random_sample(3)
                 axis /= np.sqrt(np.dot(axis, axis))
@@ -70,7 +70,7 @@ def read_strands():
             axis = np.random.random_sample(3)
             axis /= np.sqrt(np.dot(axis, axis))
             print >> sys.stderr, "Adding single strand of %i bases" % (len(line))
-            while not s.add_strand(double.generate(len(line), sequence=seq, dir=axis, start_pos=cdm, double=False)):
+            while not s.add_strand(double.generate(len(line), sequence=seq, dir=axis, start_position=cdm, double=False)):
                 cdm = np.random.random_sample(3) * s._box
                 axis = np.random.random_sample(3)
                 axis /= np.sqrt(np.dot(axis, axis))

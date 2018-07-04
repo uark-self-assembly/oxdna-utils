@@ -11,8 +11,27 @@ import numpy
 import argparse
 
 from typing import List, Dict
+from pprint import pprint
 
 constants = {'PI': numpy.pi}
+
+
+def test_file(file_path: str, mode: str) -> bool:
+    file_exists = os.path.isfile(file_path)
+
+    try:
+        file = open(file_path, mode)
+        file.close()
+    except:
+        return False
+
+    if not file_exists:
+        try:
+            os.remove(file_path)
+        except:
+            pass
+
+    return True
 
 
 class Strand:
@@ -26,7 +45,7 @@ class Strand:
         'C': 2, 'c': 2, 'T': 3, 't': 3
     }
 
-    def __init__(self, sequence: str='', double: bool=False, line: str=None):
+    def __init__(self, sequence: str = '', double: bool = False, line: str = None):
         """
         Initializes a new Strand object. To properly initialize a Strand, either supply a sequence as a string,
         or supply a "line" from a file.
@@ -72,12 +91,16 @@ class Strand:
 
 
 class System:
-    def __init__(self, strands: List[Strand]=None):
+    def __init__(self, strands: List[Strand] = None, box: numpy.ndarray = None):
         if strands is None:
             strands = []
         self.strands: List[Strand] = strands
         self.nucleotide_count: int = sum([strand.nucleotide_count() for strand in self.strands])
         self.strand_count: int = sum([strand.strand_count() for strand in self.strands])
+
+        if box is None:
+            box = numpy.ndarray((50, 50, 50))
+        self.box = box
         self.positions: List[numpy.ndarray] = []
         self.a1s: List[numpy.ndarray] = []
         self.a3s: List[numpy.ndarray] = []
@@ -102,23 +125,23 @@ class System:
                 q_pos_base = q + qa1 * constants['POS_BASE']
 
                 dr = p_pos_back - q_pos_back
-                dr -= box * numpy.rint(dr / box)
+                dr -= self.box * numpy.rint(dr / self.box)
 
                 if numpy.dot(dr, dr) < constants['RC2_BACK']:
                     overlap = True
 
                 dr = p_pos_base - q_pos_base
-                dr -= box * numpy.rint(dr / box)
+                dr -= self.box * numpy.rint(dr / self.box)
                 if numpy.dot(dr, dr) < constants['RC2_BASE']:
                     overlap = True
 
                 dr = p_pos_back - q_pos_base
-                dr -= box * numpy.rint(dr / box)
+                dr -= self.box * numpy.rint(dr / self.box)
                 if numpy.dot(dr, dr) < constants['RC2_BACK_BASE']:
                     overlap = True
 
                 dr = p_pos_base - q_pos_back
-                dr -= box * numpy.rint(dr / box)
+                dr -= self.box * numpy.rint(dr / self.box)
                 if numpy.dot(dr, dr) < constants['RC2_BACK_BASE']:
                     overlap = True
 
@@ -152,7 +175,6 @@ def is_float(value):
 
 # every defined macro in model.h must be imported in this module
 def import_model_constants():
-
     model_file_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'model.h')
     model_file = open(model_file_path)
     for line in model_file.readlines():
@@ -194,38 +216,70 @@ def get_rotation_matrix(axis, anglest):
     olc = 1. - ct
     x, y, z = axis
 
-    return numpy.array([[olc*x*x+ct, olc*x*y-st*z, olc*x*z+st*y],
-                       [olc*x*y+st*z, olc*y*y+ct, olc*y*z-st*x],
-                       [olc*x*z-st*y, olc*y*z+st*x, olc*z*z+ct]])
+    return numpy.array([[olc * x * x + ct, olc * x * y - st * z, olc * x * z + st * y],
+                        [olc * x * y + st * z, olc * y * y + ct, olc * y * z - st * x],
+                        [olc * x * z - st * y, olc * y * z + st * x, olc * z * z + ct]])
+
+
+def normalize(array: numpy.ndarray):
+    magnitude = numpy.sqrt(numpy.dot(array, array))
+    array[0] /= magnitude
+    array[1] /= magnitude
+    array[2] /= magnitude
+
+
+def check_direction(
+        position: numpy.ndarray,
+        direction: numpy.ndarray,
+        minimum: int,
+        maximum: int) -> (numpy.ndarray, bool):
+
+    if len(direction) != 3 or len(position) != 3:
+        return direction, False
+
+    if (position[0] < minimum and direction[0] < 0) or (position[0] > maximum and direction[0] > 0):
+        direction[0] = -direction[0]
+        return direction, True
+
+    if (position[1] < minimum and direction[1] < 0) or (position[1] > maximum and direction[1] > 0):
+        direction[1] = -direction[1]
+        return direction, True
+
+    if (position[2] < minimum and direction[2] < 0) or (position[2] > maximum and direction[2] > 0):
+        direction[2] = -direction[2]
+        return direction, True
+
+    return direction, False
 
 
 class StrandGenerator(object):
     def generate(self,
-                 bp,
+                 base_pairs,
                  sequence=None,
-                 start_pos=numpy.array([0, 0, 0]),
+                 start_position=numpy.array([0, 0, 0]),
                  direction=numpy.array([0, 0, 1]),
                  perpendicular=False,
                  double_strand=True,
-                 rotation=0.):
+                 rotation_speed=0.,
+                 folded=False):
 
         new_positions = []
         new_a1s = []
         new_a3s = []
 
         # we need a numpy array for these
-        start_pos = numpy.array(start_pos, dtype=float)
+        start_position = numpy.array(start_position, dtype=float)
         direction = numpy.array(direction, dtype=float)
         if sequence is None:
-            sequence = numpy.random.randint(0, 4, bp)
-        elif len(sequence) != bp:
-            n = bp - len(sequence)
+            sequence = numpy.random.randint(0, 4, base_pairs)
+        elif len(sequence) != base_pairs:
+            n = base_pairs - len(sequence)
             sequence += numpy.random.randint(0, 4, n)
             print('sequence is too short, adding {} random bases'.format(n), file=sys.stderr)
 
         # create the sequence of the second strand as made of complementary bases
-        sequence2 = [(3 - s) for s in sequence]
-        sequence2.reverse()
+        complement = [(3 - s) for s in sequence]
+        complement.reverse()
 
         # we need to find a vector orthogonal to dir
         dir_norm = numpy.sqrt(numpy.dot(direction, direction))
@@ -238,61 +292,64 @@ class StrandGenerator(object):
         if perpendicular is None or perpendicular is False:
             v1 = numpy.random.random_sample(3)
             v1 -= direction * (numpy.dot(direction, v1))
-            v1 /= numpy.sqrt(sum(v1*v1))
+            v1 /= numpy.sqrt(sum(v1 * v1))
         else:
             v1 = perpendicular
 
         # and we need to generate a rotational matrix
-        R0 = get_rotation_matrix(direction, rotation)
-        R = get_rotation_matrix(direction, [1, 'bp'])
+        r0 = get_rotation_matrix(direction, rotation_speed)
+        rotation_matrix = get_rotation_matrix(direction, [1, 'bp'])
 
-        a1 = v1
-        a1 = numpy.dot(R0, a1)
-        rb = numpy.array(start_pos)
-        a3 = direction
-        for i in range(bp):
-            rcdm = rb - constants['CM_CENTER_DS'] * a1
+        rotation = numpy.dot(r0, v1)
+        position = numpy.array(start_position)
+
+        for i in range(base_pairs):
+            rcdm = position - constants['CM_CENTER_DS'] * rotation
             new_positions.append(rcdm)
-            new_a1s.append(a1)
-            new_a3s.append(a3)
+            new_a1s.append(rotation)
+            new_a3s.append(direction)
 
-            if i != bp-1:
-                a1 = numpy.dot(R, a1)
-                rb += a3 * constants['BASE_BASE']
+            if i != base_pairs - 1:
+                rotation = numpy.dot(rotation_matrix, rotation)
+                position += direction * constants['BASE_BASE'] * (0.8 if folded else 1)
+
+            if folded:
+                (direction, changed) = check_direction(position, direction, minimum=2, maximum=box_size - 2)
+                if changed:
+                    rotation_matrix = get_rotation_matrix(-direction, [1, 'bp'])
 
         if double_strand:
-            a1 = -a1
-            a3 = -direction
-            R = R.transpose()
-            for i in range(bp):
-                rcdm = rb - constants['CM_CENTER_DS'] * a1
+            rotation = -rotation
+            direction = -direction
+            rotation_matrix = rotation_matrix.transpose()
+            for i in range(base_pairs):
+                rcdm = position - constants['CM_CENTER_DS'] * rotation
                 new_positions.append(rcdm)
-                new_a1s.append(a1)
-                new_a3s.append(a3)
+                new_a1s.append(rotation)
+                new_a3s.append(direction)
 
-                a1 = numpy.dot(R, a1)
-                rb += a3 * constants['BASE_BASE']
+                rotation = numpy.dot(rotation_matrix, rotation)
+                position += direction * constants['BASE_BASE']
 
         assert len(new_positions) > 0
 
         return [new_positions, new_a1s, new_a3s]
 
 
-def parse_strands(file_path):
+def parse_strands(file_path: str) -> List[Strand]:
     sequence_file = open(file_path, 'r')
     lines = sequence_file.readlines()
-    return [Strand(line=line) for line in lines]
+    strands: List[Strand] = [Strand(line=line) for line in lines]
+    strands.sort(key=lambda strand: len(strand.sequence), reverse=True)
+    return strands
 
 
-def generate_topology(system: System):
-    print('strand_count, nucleotide_count = {}, {}'.format(system.strand_count, system.nucleotide_count), file=sys.stderr)
+def generate_topology(system: System, output_file_path):
+    print('strand_count, nucleotide_count = {}, {}'.format(system.strand_count, system.nucleotide_count),
+          file=sys.stderr)
 
     # here we generate the topology file
-    try:
-        topology_file = open('generated.top', 'w')
-    except:
-        print('Could not open "generated.top" for writing. Aborting', file=sys.stderr)
-        sys.exit(4)
+    topology_file = open(output_file_path, 'w')
 
     print(system.nucleotide_count, system.strand_count, file=topology_file)
 
@@ -344,6 +401,8 @@ def generate_dat(system: System):
     lines_count = len(system.strands)
     i = 1
 
+    first = True
+
     for strand in system.strands:
         double = strand.double
         sequence = strand.to_integer_array()
@@ -356,16 +415,43 @@ def generate_dat(system: System):
             file=sys.stderr)
 
         strands_added = False
-        while not strands_added:
-            cdm = numpy.random.random_sample(3) * box
-            axis = numpy.random.random_sample(3)
-            axis /= numpy.sqrt(numpy.dot(axis, axis))
-            positions, a1s, a3s = strand_generator.generate(len(sequence), sequence=sequence, direction=axis,
-                                                            start_pos=cdm, double_strand=double)
 
+        while not strands_added:
+            # Pick random start position inside box
+            if first:
+                random_direction = numpy.random.random_sample(3)
+                # Normalize random direction
+                normalize(random_direction)
+                positions, a1s, a3s = strand_generator.generate(
+                    len(sequence),
+                    sequence=sequence,
+                    direction=random_direction,
+                    start_position=numpy.array([box_size / 2, box_size / 2, box_size / 2]),
+                    double_strand=double,
+                    folded=True)
+            else:
+                random_start_position: numpy.ndarray = numpy.random.random_sample(3) * system.box
+
+                # Pick random direction
+                random_direction = numpy.random.random_sample(3)
+                # Normalize random direction
+                normalize(random_direction)
+
+                # Generate the coordinates for this strand given the random position and direction
+                positions, a1s, a3s = strand_generator.generate(
+                    len(sequence),
+                    sequence=sequence,
+                    direction=random_direction,
+                    start_position=random_start_position,
+                    double_strand=double,
+                    folded=False)
+
+            # Attempt to place the strand in the system. `strands_added` is True if successful
             strands_added = system.add_strand(positions, a1s, a3s)
 
-        print('##  done line {} / {}, now at {}/{}'.format(i, lines_count, len(system.positions), system.nucleotide_count),
+        first = False
+        print('##  done line {} / {}, now at {}/{}'.format(i, lines_count, len(system.positions),
+                                                           system.nucleotide_count),
               file=sys.stderr)
 
         i += 1
@@ -406,33 +492,47 @@ if __name__ == '__main__':
         'input_file_path', metavar='SEQUENCE_FILE', type=str, help='A file with DNA sequences on separate lines')
     parser.add_argument(
         '-b', '--box-size', type=int, dest='box_size', default=50, help='The box size to use. Default is 50')
+    parser.add_argument(
+        '-o', '--output', type=str, dest='output_file_name', default='generated',
+        help='The name of the generated files.')
 
     args = parser.parse_args()
 
     input_file_path = args.input_file_path
     box_size = args.box_size
+    output_file_name = args.output_file_name
 
-    try:
-        input_file = open(input_file_path, 'r')
-        input_file.close()
-    except:
+    if not test_file(input_file_path, 'r'):
         print('Could not open file {} for reading. Aborting.'.format(input_file_path), file=sys.stderr)
         sys.exit(2)
 
-    box = numpy.array([box_size, box_size, box_size])
+    if not test_file(output_file_name + '.dat', 'w'):
+        print('Could not open file {} for writing. Aborting.'.format(output_file_name + '.dat'), file=sys.stderr)
+        sys.exit(2)
+
+    if not test_file(output_file_name + '.top', 'w'):
+        print('Could not open file {} for writing. Aborting.'.format(output_file_name + '.top'), file=sys.stderr)
+        sys.exit(2)
 
     import_model_constants()
 
     constants['CM_CENTER_DS'] = constants['POS_BASE'] + 0.2
     constants['BASE_BASE'] = 0.3897628551303122
 
-    constants['RC2_BACK'] = constants['EXCL_RC1']**2
-    constants['RC2_BASE'] = constants['EXCL_RC2']**2
-    constants['RC2_BACK_BASE'] = constants['EXCL_RC3']**2
+    constants['RC2_BACK'] = constants['EXCL_RC1'] ** 2
+    constants['RC2_BASE'] = constants['EXCL_RC2'] ** 2
+    constants['RC2_BACK_BASE'] = constants['EXCL_RC3'] ** 2
+
+    if os.path.isfile(output_file_name + '.top'):
+        os.remove(output_file_name + '.top')
+
+    if os.path.isfile(output_file_name + '.dat'):
+        os.remove(output_file_name + '.dat')
 
     parsed_strands = parse_strands(input_file_path)
-    oxdna_system = System(strands=parsed_strands)
-    generate_topology(oxdna_system)
+    oxdna_system = System(strands=parsed_strands, box=numpy.array([box_size, box_size, box_size]))
+    generate_topology(oxdna_system, output_file_path=output_file_name + '.top')
     generate_dat(oxdna_system)
 
-    print('## ALL DONE. Generated "generated.dat" and "generated.top"', file=sys.stderr)
+    print('## ALL DONE. Generated {} and {}'.format(output_file_name + '.top', output_file_name + '.dat'),
+          file=sys.stderr)
