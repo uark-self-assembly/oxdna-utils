@@ -11,7 +11,6 @@ import numpy
 import argparse
 
 from typing import List, Dict
-from pprint import pprint
 
 constants = {'PI': numpy.pi}
 
@@ -89,6 +88,9 @@ class Strand:
     def to_integer_array(self) -> List[int]:
         return [Strand._base_to_number_table[i] for i in self.sequence]
 
+    def needs_folding(self):
+        return len(self.sequence) > 100
+
 
 class System:
     def __init__(self, strands: List[Strand] = None, box: numpy.ndarray = None):
@@ -155,32 +157,20 @@ class System:
 
         return True
 
-
-# return parts of a string
-def partition(string_value, delimiter):
-    if delimiter in string_value:
-        split = string_value.split(delimiter, 1)
-        return split[0], delimiter, split[1]
-    else:
-        return string_value, '', ''
-
-
-def is_float(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
+    def box_size(self):
+        return self.box[0]
 
 
 # every defined macro in model.h must be imported in this module
 def import_model_constants():
     model_file_path = os.path.join(os.path.dirname(__file__), '..', 'src', 'model.h')
     model_file = open(model_file_path)
-    for line in model_file.readlines():
-        line = partition(line.strip(), '//')[0].strip()
+    lines = [line.strip().split('//', 1)[0] for line in model_file.readlines()]
+    for line in lines:
+        if '#define' not in line:
+            continue
 
-        macro = partition(line, '#define ')[2].strip().split(' ', 1)
+        macro = line.split('#define ')[1].strip().split(' ', 1)
         if len(macro) > 1:
             key, value = [x.strip() for x in macro]
             value = value.replace('f', '')
@@ -221,119 +211,101 @@ def get_rotation_matrix(axis, anglest):
                         [olc * x * z - st * y, olc * y * z + st * x, olc * z * z + ct]])
 
 
+def magnitude(array: numpy.ndarray) -> float:
+    return numpy.sqrt(numpy.dot(array, array))
+
+
 def normalize(array: numpy.ndarray):
-    magnitude = numpy.sqrt(numpy.dot(array, array))
-    array[0] /= magnitude
-    array[1] /= magnitude
-    array[2] /= magnitude
+    array /= magnitude(array)
 
 
-def check_direction(
-        position: numpy.ndarray,
-        direction: numpy.ndarray,
-        minimum: int,
-        maximum: int) -> (numpy.ndarray, bool):
-
-    if len(direction) != 3 or len(position) != 3:
-        return direction, False
-
-    if (position[0] < minimum and direction[0] < 0) or (position[0] > maximum and direction[0] > 0):
-        direction[0] = -direction[0]
-        return direction, True
-
-    if (position[1] < minimum and direction[1] < 0) or (position[1] > maximum and direction[1] > 0):
-        direction[1] = -direction[1]
-        return direction, True
-
-    if (position[2] < minimum and direction[2] < 0) or (position[2] > maximum and direction[2] > 0):
-        direction[2] = -direction[2]
-        return direction, True
-
-    return direction, False
+def distance(point1: numpy.ndarray, point2: numpy.ndarray) -> numpy.float64:
+    return numpy.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2 + (point1[2] - point2[2]) ** 2)
 
 
-class StrandGenerator(object):
-    def generate(self,
-                 base_pairs,
-                 sequence=None,
-                 start_position=numpy.array([0, 0, 0]),
-                 direction=numpy.array([0, 0, 1]),
-                 perpendicular=False,
-                 double_strand=True,
-                 rotation_speed=0.,
-                 folded=False):
+def get_circular_direction(theta: float, box: float) -> (float, numpy.array):
+    new_theta = theta + ((2. * constants['BASE_BASE'] / box) % (2 * numpy.pi))
+    direction = numpy.array([numpy.cos(new_theta), numpy.sin(new_theta), 0.08])
+    normalize(direction)
+    return new_theta, direction
 
-        new_positions = []
-        new_a1s = []
-        new_a3s = []
 
-        # we need a numpy array for these
-        start_position = numpy.array(start_position, dtype=float)
+def generate_strand(system: System,
+                    base_pairs,
+                    start_position=numpy.array([0, 0, 0]),
+                    direction=numpy.array([0, 0, 1]),
+                    perpendicular=False,
+                    double_strand=True,
+                    rotation_speed=0.,
+                    folded=False):
+    if folded and double_strand:
+        print('Folded, double-stranded DNA is not supported.', file=sys.stderr)
+        raise ValueError()
+
+    new_positions = []
+    new_a1s = []
+    new_a3s = []
+
+    # we need a numpy array for these
+    start_position = numpy.array(start_position, dtype=float)
+
+    theta = 0.
+    if folded:
+        (theta, direction) = get_circular_direction(theta, system.box_size())
+    else:
         direction = numpy.array(direction, dtype=float)
-        if sequence is None:
-            sequence = numpy.random.randint(0, 4, base_pairs)
-        elif len(sequence) != base_pairs:
-            n = base_pairs - len(sequence)
-            sequence += numpy.random.randint(0, 4, n)
-            print('sequence is too short, adding {} random bases'.format(n), file=sys.stderr)
 
-        # create the sequence of the second strand as made of complementary bases
-        complement = [(3 - s) for s in sequence]
-        complement.reverse()
+    # we need to find a vector orthogonal to dir
+    if magnitude(direction) < 1e-10:
+        print('`direction` must be a valid vector, defaulting to (0, 0, 1)', file=sys.stderr)
+        direction = numpy.array([0, 0, 1])
+    else:
+        normalize(direction)
 
-        # we need to find a vector orthogonal to dir
-        dir_norm = numpy.sqrt(numpy.dot(direction, direction))
-        if dir_norm < 1e-10:
-            print('direction must be a valid vector, defaulting to (0, 0, 1)', file=sys.stderr)
-            direction = numpy.array([0, 0, 1])
-        else:
-            direction /= dir_norm
+    if perpendicular is None or perpendicular is False:
+        v1 = numpy.random.random_sample(3)
+        v1 -= direction * (numpy.dot(direction, v1))
+        v1 /= numpy.sqrt(sum(v1 * v1))
+    else:
+        v1 = perpendicular
 
-        if perpendicular is None or perpendicular is False:
-            v1 = numpy.random.random_sample(3)
-            v1 -= direction * (numpy.dot(direction, v1))
-            v1 /= numpy.sqrt(sum(v1 * v1))
-        else:
-            v1 = perpendicular
+    # and we need to generate a rotational matrix
+    r0 = get_rotation_matrix(direction, rotation_speed)
+    rotation_matrix = get_rotation_matrix(direction, [1, 'bp'])
 
-        # and we need to generate a rotational matrix
-        r0 = get_rotation_matrix(direction, rotation_speed)
-        rotation_matrix = get_rotation_matrix(direction, [1, 'bp'])
+    rotation = numpy.dot(r0, v1)
+    position = numpy.array(start_position)
 
-        rotation = numpy.dot(r0, v1)
-        position = numpy.array(start_position)
+    for i in range(base_pairs):
+        rcdm = position - constants['CM_CENTER_DS'] * rotation
+        new_positions.append(rcdm)
+        new_a1s.append(rotation)
+        new_a3s.append(direction)
 
+        if folded:
+            (theta, direction) = get_circular_direction(theta, system.box_size())
+            rotation_matrix = get_rotation_matrix(direction, [1, 'bp'])
+
+        if i != base_pairs - 1:
+            position += direction * constants['BASE_BASE']
+            rotation = numpy.dot(rotation_matrix, rotation)
+
+    if double_strand:
+        rotation = -rotation
+        direction = -direction
+        rotation_matrix = rotation_matrix.transpose()
         for i in range(base_pairs):
             rcdm = position - constants['CM_CENTER_DS'] * rotation
             new_positions.append(rcdm)
             new_a1s.append(rotation)
             new_a3s.append(direction)
 
-            if i != base_pairs - 1:
-                rotation = numpy.dot(rotation_matrix, rotation)
-                position += direction * constants['BASE_BASE'] * (0.8 if folded else 1)
+            rotation = numpy.dot(rotation_matrix, rotation)
+            position += direction * constants['BASE_BASE']
 
-            if folded:
-                (direction, changed) = check_direction(position, direction, minimum=2, maximum=box_size - 2)
-                if changed:
-                    rotation_matrix = get_rotation_matrix(-direction, [1, 'bp'])
+    assert len(new_positions) > 0
 
-        if double_strand:
-            rotation = -rotation
-            direction = -direction
-            rotation_matrix = rotation_matrix.transpose()
-            for i in range(base_pairs):
-                rcdm = position - constants['CM_CENTER_DS'] * rotation
-                new_positions.append(rcdm)
-                new_a1s.append(rotation)
-                new_a3s.append(direction)
-
-                rotation = numpy.dot(rotation_matrix, rotation)
-                position += direction * constants['BASE_BASE']
-
-        assert len(new_positions) > 0
-
-        return [new_positions, new_a1s, new_a3s]
+    return [new_positions, new_a1s, new_a3s]
 
 
 def parse_strands(file_path: str) -> List[Strand]:
@@ -345,7 +317,8 @@ def parse_strands(file_path: str) -> List[Strand]:
 
 
 def generate_topology(system: System, output_file_path):
-    print('strand_count, nucleotide_count = {}, {}'.format(system.strand_count, system.nucleotide_count),
+    print('box_size, strand_count, nucleotide_count = {}, {}, {}'
+          .format(system.box_size(), system.strand_count, system.nucleotide_count),
           file=sys.stderr)
 
     # here we generate the topology file
@@ -397,59 +370,50 @@ def generate_topology(system: System, output_file_path):
 
 def generate_dat(system: System):
     # generate the strands
-    strand_generator = StrandGenerator()
     lines_count = len(system.strands)
     i = 1
-
-    first = True
 
     for strand in system.strands:
         double = strand.double
         sequence = strand.to_integer_array()
+        folded = strand.needs_folding()
         # skip empty lines
         if len(sequence) == 0:
             continue
 
-        print(
-            '## Adding {} of {} bases'.format('duplex' if double else 'single strand', len(sequence)),
-            file=sys.stderr)
+        print('## Adding {} of {} bases: {}'
+              .format('duplex' if double else 'single strand', len(sequence), strand.sequence),
+              file=sys.stderr)
 
         strands_added = False
 
         while not strands_added:
             # Pick random start position inside box
-            if first:
-                random_direction = numpy.random.random_sample(3)
-                # Normalize random direction
-                normalize(random_direction)
-                positions, a1s, a3s = strand_generator.generate(
-                    len(sequence),
-                    sequence=sequence,
-                    direction=random_direction,
-                    start_position=numpy.array([box_size / 2, box_size / 2, box_size / 2]),
-                    double_strand=double,
-                    folded=True)
-            else:
-                random_start_position: numpy.ndarray = numpy.random.random_sample(3) * system.box
+            random_start_position: numpy.ndarray = numpy.random.random_sample(3) * system.box
 
-                # Pick random direction
-                random_direction = numpy.random.random_sample(3)
-                # Normalize random direction
-                normalize(random_direction)
+            # Pick random direction
+            random_direction = numpy.random.random_sample(3) * 2 - 1
 
-                # Generate the coordinates for this strand given the random position and direction
-                positions, a1s, a3s = strand_generator.generate(
-                    len(sequence),
-                    sequence=sequence,
-                    direction=random_direction,
-                    start_position=random_start_position,
-                    double_strand=double,
-                    folded=False)
+            if folded:
+                random_start_position = numpy.array(
+                    [system.box_size() / 2, system.box_size() / 2, system.box_size() / 2])
+                random_direction = numpy.array([1., 0., 0.])
+
+            # Normalize random direction
+            normalize(random_direction)
+
+            # Generate the coordinates for this strand given the random position and direction
+            positions, a1s, a3s = generate_strand(
+                system=system,
+                base_pairs=len(sequence),
+                direction=random_direction,
+                start_position=random_start_position,
+                double_strand=double,
+                folded=folded)
 
             # Attempt to place the strand in the system. `strands_added` is True if successful
             strands_added = system.add_strand(positions, a1s, a3s)
 
-        first = False
         print('##  done line {} / {}, now at {}/{}'.format(i, lines_count, len(system.positions),
                                                            system.nucleotide_count),
               file=sys.stderr)

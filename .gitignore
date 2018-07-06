@@ -76,3 +76,4 @@ pip-selfcheck.json
 .idea/uiDesigner.xml
 
 output/
+!output/oxdna_input

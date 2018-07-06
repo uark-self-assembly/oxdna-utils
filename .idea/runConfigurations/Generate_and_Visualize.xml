@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Generate and Visualize" type="BashConfigurationType" factoryName="Bash" singleton="true">
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="INTERPRETER_PATH" value="/bin/bash" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/output" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run_visualizer.sh" />
+    <option name="PARAMETERS" value="generated.top generated.dat" />
+    <module name="" />
+    <method>
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="generate-folded.py" run_configuration_type="PythonConfigurationType" />
+    </method>
+  </configuration>
+</component>
