@@ -239,7 +239,7 @@ def generate_strand(system: System,
                     rotation_speed=0.,
                     folded=False):
     if folded and double_strand:
-        print('Folded, double-stranded DNA is not supported.', file=sys.stderr)
+        print('Folded, double-stranded DNA is not supported.', file=sys.stderr, flush=True)
         raise ValueError()
 
     new_positions = []
@@ -257,7 +257,7 @@ def generate_strand(system: System,
 
     # we need to find a vector orthogonal to dir
     if magnitude(direction) < 1e-10:
-        print('`direction` must be a valid vector, defaulting to (0, 0, 1)', file=sys.stderr)
+        print('`direction` must be a valid vector, defaulting to (0, 0, 1)', file=sys.stderr, flush=True)
         direction = numpy.array([0, 0, 1])
     else:
         normalize(direction)
@@ -311,7 +311,7 @@ def generate_strand(system: System,
 def parse_strands(file_path: str) -> List[Strand]:
     sequence_file = open(file_path, 'r')
     lines = sequence_file.readlines()
-    strands: List[Strand] = [Strand(line=line) for line in lines]
+    strands: List[Strand] = [Strand(line=line) for line in lines if len(line) > 0]
     strands.sort(key=lambda strand: len(strand.sequence), reverse=True)
     return strands
 
@@ -319,7 +319,7 @@ def parse_strands(file_path: str) -> List[Strand]:
 def generate_topology(system: System, output_file_path):
     print('box_size, strand_count, nucleotide_count = {}, {}, {}'
           .format(system.box_size(), system.strand_count, system.nucleotide_count),
-          file=sys.stderr)
+          file=sys.stderr, flush=True)
 
     # here we generate the topology file
     topology_file = open(output_file_path, 'w')
@@ -383,7 +383,7 @@ def generate_dat(system: System):
 
         print('## Adding {} of {} bases: {}'
               .format('duplex' if double else 'single strand', len(sequence), strand.sequence),
-              file=sys.stderr)
+              file=sys.stderr, flush=True)
 
         strands_added = False
 
@@ -416,7 +416,7 @@ def generate_dat(system: System):
 
         print('##  done line {} / {}, now at {}/{}'.format(i, lines_count, len(system.positions),
                                                            system.nucleotide_count),
-              file=sys.stderr)
+              file=sys.stderr, flush=True)
 
         i += 1
 
@@ -428,7 +428,7 @@ def generate_dat(system: System):
     try:
         dat_file = open('generated.dat', 'w')
     except:
-        print('Could not open generated.dat for writing. Aborting', file=sys.stderr)
+        print('Could not open generated.dat for writing. Aborting', file=sys.stderr, flush=True)
         sys.exit(5)
 
     print('t = 0', file=dat_file)
@@ -467,15 +467,17 @@ if __name__ == '__main__':
     output_file_name = args.output_file_name
 
     if not test_file(input_file_path, 'r'):
-        print('Could not open file {} for reading. Aborting.'.format(input_file_path), file=sys.stderr)
+        print('Could not open file {} for reading. Aborting.'.format(input_file_path), file=sys.stderr, flush=True)
         sys.exit(2)
 
     if not test_file(output_file_name + '.dat', 'w'):
-        print('Could not open file {} for writing. Aborting.'.format(output_file_name + '.dat'), file=sys.stderr)
+        print('Could not open file {} for writing. Aborting.'.format(output_file_name + '.dat'),
+              file=sys.stderr, flush=True)
         sys.exit(2)
 
     if not test_file(output_file_name + '.top', 'w'):
-        print('Could not open file {} for writing. Aborting.'.format(output_file_name + '.top'), file=sys.stderr)
+        print('Could not open file {} for writing. Aborting.'.format(output_file_name + '.top'),
+              file=sys.stderr, flush=True)
         sys.exit(2)
 
     import_model_constants()
@@ -499,4 +501,4 @@ if __name__ == '__main__':
     generate_dat(oxdna_system)
 
     print('## ALL DONE. Generated {} and {}'.format(output_file_name + '.top', output_file_name + '.dat'),
-          file=sys.stderr)
+          file=sys.stderr, flush=True)
