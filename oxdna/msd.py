@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -23,11 +23,11 @@ nmsd = np.zeros(block_size, dtype = np.int64)
 while stmp:
     if (nconf%block_size == 0):
         nblock += 1
-        print >> sys.stderr, " -- Starting block %i " % (nblock)
+        print(" -- Starting block %i " % (nblock), file=sys.stderr)
         s = []
 
     nconf += 1
-    print >> sys.stderr, " --- Working on conf %d, block %i" % (nconf, nblock)
+    print(" --- Working on conf %d, block %i" % (nconf, nblock), file=sys.stderr)
 
     for i in range(len(s)):
         for j in range(i):
@@ -73,8 +73,8 @@ while stmp:
 
 out = open ("msd.dat", "w")
 for i in range(1, block_size - 1):
-    print >> out, "%7i %10.5g" % (i, msd[i] / nmsd[i])
+    print("%7i %10.5g" % (i, msd[i] / nmsd[i]), file=out)
 out.close ()
 
-print >> sys.stderr, "All DONE"
+print("All DONE", file=sys.stderr)
 

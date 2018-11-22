@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 '''
 This utility requires python-plex, which can be downloaded from http://pypi.python.org/pypi/plex/
-''' 
+'''
 
 import sys
 import plex as px
@@ -15,7 +15,7 @@ try:
     ORDERED_DICT = True
 except Exception:
     ORDERED_DICT = False
-    print >> sys.stderr, "WARNING: OrderedDict not available, the options will be output unordered."
+    print("WARNING: OrderedDict not available, the options will be output unordered.", file=sys.stderr)
 
 '''
 Here we assign source files to categories in order to tidy up the output
@@ -73,7 +73,7 @@ CATEGORIES["Observables"] = [
                              "Observables/*.h",
                              "Observables/*/*.h"
                              ]
-                             
+
 CATEGORIES["External Forces"] = [
                              "Forces/*.h"
                              ]
@@ -100,8 +100,8 @@ LR_TAB = '    '
 
 def warning(position, text):
     filename = position[0].rpartition("src")[2]
-    print >> sys.stderr, "WARNING: '%s', line %d: %s" % (filename, position[1], text)
-    
+    print("WARNING: '%s', line %d: %s" % (filename, position[1], text), file=sys.stderr)
+
 
 def indent(my_str):
     return '\n'.join((LR_TAB + x) for x in my_str.split('\n'))
@@ -113,7 +113,7 @@ class Option(object):
         self.value = value.strip().replace('\\n', '\n')
         self.description = description.strip().replace('\\n', '\n')
         self.optional = optional
-        
+
     def text(self, wiki=False):
         if not wiki:
             spl = wrap(self.description, 70)
@@ -125,20 +125,20 @@ class Option(object):
             key_value = key_value.replace("\n", "<br />")
             if self.optional: return ";[%s]\n: %s" % (key_value, self.description)
             else: return ";%s\n: %s" % (key_value, self.description)
-        
-        
+
+
 class OptionScanner(px.Scanner):
     def set_as_optional(self, text):
         self.current_is_optional = True
         return None
-    
+
     def option_found(self, text):
         spl = [x.strip() for x in text.strip().split("\n")]
         for line in spl:
             if len(line) == 0: continue
             position = list(self.position())
             position[1] += spl.index(line)
-            
+
             optional = (line[0] == "[")
             if optional and line[-1] != "]":
                 warning(position, "unmatched '['")
@@ -147,39 +147,39 @@ class OptionScanner(px.Scanner):
                 warning(position, "unmatched ']', treating the option as 'optional'")
                 optional = True
                 line = "[" + line
-                
+
             if optional:
                 type = "optional"
                 line = line[1:-1]
             else: type = "required"
-            
+
             spl_line = line.split("=", 1)
             if len(spl_line) != 2:
                 warning(position, "invalid format, missing '='")
                 continue
-            
+
             key = spl_line[0].strip()
             parts = spl_line[1].partition("(")
             if parts[1] == "":
                 warning(position, "invalid format, the option description should be preceeded by a '('")
                 continue
-            
+
             value = parts[0].strip()
             if parts[2][-1] != ")":
                 warning(position, "invalid format, the option description should be followed by a ')'")
                 continue
-            
+
             description = parts[2][:-1]
-                
+
             self.produce(type, [key, value, description])
-    
+
     space = px.Any(" \t")
     lineterm = px.Str("\n") | px.Eof
     option = px.Rep(px.AnyBut("\n")) + lineterm
     begin_option_section = px.Str("@verbatim") + px.Rep(px.AnyBut("\n")) + lineterm
     end_option_section = px.Str("@endverbatim") + px.Rep(px.AnyBut("\n")) + lineterm
     options = px.Rep1(px.AnyBut("@"))
-    
+
     lexicon = px.Lexicon([
                          (begin_option_section, px.Begin("option_section")),
                          (px.AnyChar, px.IGNORE),
@@ -188,13 +188,13 @@ class OptionScanner(px.Scanner):
                                            (options, option_found),
                                            ]),
                          ])
-    
+
     def __init__(self, filename):
         self.file = open(filename)
         px.Scanner.__init__(self, self.lexicon, self.file, filename)
         self.current_is_optional = False
-        
-        
+
+
 class Options(object):
     def __init__(self, id):
         object.__init__(self)
@@ -213,30 +213,30 @@ class Options(object):
     def print_options(self, wiki):
         N = self.get_N_options()
         if N == 0: return
-        
-        print >> sys.stderr, "Number of '%s' options: %d" % (self.id, N)
-        
+
+        print("Number of '%s' options: %d" % (self.id, N), file=sys.stderr)
+
         if not wiki:
-            print self.id + " options:\n"
+            print(self.id + " options:\n")
             for option in self.options.itervalues():
-                print indent(option.text())
-            print ""
+                print(indent(option.text()))
+            print("")
         else:
-            print "===%s options===\n" % self.id
+            print("===%s options===\n" % self.id)
             for option in self.options.itervalues():
-                print option.text(True)
-            print ""
+                print(option.text(True))
+            print("")
 
     def get_N_options(self):
         return len(self.options)
 
-        
+
 cwd = os.path.dirname(os.path.realpath(__file__))
 base_path = os.path.join(cwd, "..", "src")
 
 wiki = len(sys.argv) > 1 and sys.argv[1] == "wiki"
-    
-for cat, cat_paths in CATEGORIES.iteritems():
+
+for cat, cat_paths in CATEGORIES.items():
     join_cat = JOIN[cat]
     cat_options = Options(cat)
     for cat_path in cat_paths:
@@ -244,7 +244,7 @@ for cat, cat_paths in CATEGORIES.iteritems():
         for cat_file in iglob(tot_path):
             base_file = cat_file.replace(base_path + os.path.sep, "")
             file_options = Options(base_file)
-            
+
             scanner = OptionScanner(cat_file)
 
             token = scanner.read()
@@ -253,8 +253,8 @@ for cat, cat_paths in CATEGORIES.iteritems():
                 file_options.add_option(new_option)
                 cat_options.add_option(new_option)
                 token = scanner.read()
-                
+
             if not join_cat: file_options.print_options(wiki)
-                
+
     if join_cat: cat_options.print_options(wiki)
-    if not wiki: print "-------------------------------------------------------------------------------\n"
+    if not wiki: print("-------------------------------------------------------------------------------\n")

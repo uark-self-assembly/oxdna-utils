@@ -17,9 +17,9 @@ checkboard[0] = [0, 1, 1, 0]
 # major index on heigth
 # each height step is a dsDNA
 # each width step is a 16bp turn
-print >> sys.stderr, "#(stderr) Will generate a %d nucleotide system" % (width * height * 32)
+print("#(stderr) Will generate a %d nucleotide system" % (width * height * 32), file=sys.stderr)
 
-print checkboard
+print(checkboard)
 
 # for each row, we print out a dsDNA
 box = np.max([2.5 * height, 17 * width])
@@ -32,7 +32,7 @@ g = gen.StrandGenerator()
 for i in range (height):
     for j in range (width):
         if checkboard[i][j] > 0:
-            print "#",
+            print("#",)
             # orientation along positive x if i is odd
             align = [float (pow (-1, i)), 0, 0]
             #align_perp = [0, 0, float (pow (-1, i))]
@@ -50,8 +50,8 @@ for i in range (height):
 
             s.add_strands(g.generate(16, dir=align, perp=align_perp, start_pos=pos, rot=rot), check_overlap=False)
         else:
-            print "0",
-    print
+            print("0",)
+    print()
 
 s.print_vmd_xyz_output (same_colors=False)
 s.print_crepy_output ("caca.mgl", same_colors=False)
@@ -79,17 +79,17 @@ for i in range (height):
     for j in range (width):
         if checkboard[i][j] == 1:
             n = strand._nucleotides[now]
-            print "caca"
-            print "prima", n.cm_pos
+            print("caca")
+            print("prima", n.cm_pos)
             n.cm_pos = [3 * j, - 3 * i, 0]
             n.cm_pos_box = n.cm_pos
-            print "dopo", n.cm_pos
+            print("dopo", n.cm_pos)
             now = now + 1
 
 
 
 for n in strand._nucleotides:
-    print n.cm_pos_box
+    print(n.cm_pos_box)
     
 s2.print_crepy_output ("ricaca.mgl", same_colors=False)
 

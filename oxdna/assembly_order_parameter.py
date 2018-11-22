@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # WORKS ONLY WITH AT MOST 2 REGIONS PER SCAFFOLD (details: competing staples as defined below will not be correctly counted)
 
@@ -205,7 +205,7 @@ while line != "":
         for strand_id in iter(region):
             if region[strand_id] >= hb_threshold:
                 region_strand_id[ii] = strand_id
-                print ii, strand_id
+                print(ii, strand_id)
                 break
 
     for ra in region_assoc:

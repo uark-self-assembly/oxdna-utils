@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -46,7 +46,7 @@ has_max_box = 0
 for S in systems[1:]:
     for k in [0, 1, 2]:
         if S._box[k] > systems[0]._box[k]:
-            print >> sys.stderr, "the biggest box has to be the first system. Aborting"
+            print("the biggest box has to be the first system. Aborting", file=sys.stderr)
             sys.exit (-2)
 
 final = systems[0].copy()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -14,11 +14,11 @@ class Trap:
     def __init__ (self, type, particle = None, pos0 = np.array([0,0,0]), rate = 0., stiff = 0., dir=np.array([0,0,1]), F0=0.):
         
         if type not in Trap.types:
-            print >> sys.stderr, "ERROR: cannot create trap with type=%s" % (type)
+            print("ERROR: cannot create trap with type=%s" % (type), file=sys.stderr)
             raise ValueError
             return None
         if particle is None:
-            print >> sys.stderr, "ERROR: cannot create trap with particle=None" % (type)
+            print("ERROR: cannot create trap with particle=None" % (type), file=sys.stderr)
             raise ValueError
             return None
         self.type = type
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         traps = parse_traps (sys.argv[1])
     else:
         traps = parse_traps ()
-    print "## traps found:" 
+    print("## traps found:" )
     for t in traps:
-        print t
+        print(t)
 

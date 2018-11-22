@@ -11,10 +11,10 @@ PROCESSDIR = os.path.join(os.path.dirname(__file__), "process_data/")
 def get_pos_midpoint(r1, r2, box):
     """
     return the midpoint of two vectors r1 and r2
-    
-    use the minimum image: i.e. make sure we get a sensible answer if the                                                                     
-    positions r1 and r2 correspond to nucleotides which were put at opposite                                                                  
-    ends of the box due to pbc's                                                                                                            
+
+    use the minimum image: i.e. make sure we get a sensible answer if the
+    positions r1 and r2 correspond to nucleotides which were put at opposite
+    ends of the box due to pbc's
     """
     assert (isinstance (box, np.ndarray) and len(box) == 3)
     return r1 - min_distance(r1, r2, box)/2
@@ -100,7 +100,7 @@ def get_sayar_twist(s1, s2, smin, smax, npoints = 1000, circular = False, integr
 
     import scipy.interpolate
     import scipy.integrate
-    
+
     s1xx, s1yy, s1zz = s1
     s2xx, s2yy, s2zz = s2
 
@@ -125,7 +125,7 @@ def get_sayar_twist(s1, s2, smin, smax, npoints = 1000, circular = False, integr
     msyy = scipy.interpolate.splrep(contour_len, myy, k = 3, s = 0, per = circular)
     mszz = scipy.interpolate.splrep(contour_len, mzz, k = 3, s = 0, per = circular)
 
-    # find the tangent of the midpoint spline. 
+    # find the tangent of the midpoint spline.
     # the tangent t(s) is d/ds [r(s)], where r(s) = (mxx(s), myy(s), mzz(s)). So the tangent is t(s) = d/ds [r(s)] = (d/ds [mxx(s)], d/ds [myy(s)], d/ds [mzz(s)])
     # get discrete array of normalised tangent vectors; __call__(xxx, 1) returns the first derivative
     # the tangent vector is a unit vector
@@ -189,7 +189,7 @@ def get_sayar_twist(s1, s2, smin, smax, npoints = 1000, circular = False, integr
         assert False, "not currently supported; shouldn't be difficult to implement if wanted"
         integral, err = scipy.integrate.quad(twist_integrand, ss[0], ss[-1], args = (msxx, msyy, mszz, nusxx, nusyy, nuszz), limit = 500)
         print >> sys.stderr, "error estimate:", err
-        
+
     twist = integral/(2 * np.pi)
 
     return twist
@@ -227,7 +227,7 @@ def get_sayar_writhe(splines1, smin, smax, splines2 = False, npoints = 1000, deb
         s1xx_bpi, s1yy_bpi, s1zz_bpi = splines1
         s2xx_bpi, s2yy_bpi, s2zz_bpi = splines2
 
-        # find the midpoint as a function of base pair index between the input splines 
+        # find the midpoint as a function of base pair index between the input splines
         xx_bpi = (scipy.interpolate.splev(bpi, s1xx_bpi) + scipy.interpolate.splev(bpi, s2xx_bpi)) / 2
         yy_bpi = (scipy.interpolate.splev(bpi, s1yy_bpi) + scipy.interpolate.splev(bpi, s2yy_bpi)) / 2
         zz_bpi = (scipy.interpolate.splev(bpi, s1zz_bpi) + scipy.interpolate.splev(bpi, s2zz_bpi)) / 2
@@ -247,7 +247,7 @@ def get_sayar_writhe(splines1, smin, smax, splines2 = False, npoints = 1000, deb
     yy = scipy.interpolate.splev(ss, syy)
     zz = scipy.interpolate.splev(ss, szz)
 
-    # find the tangent of the midpoint spline. 
+    # find the tangent of the midpoint spline.
     # the tangent t(s) is d/ds [r(s)], where r(s) = (mxx(s), myy(s), mzz(s)). So the tangent is t(s) = d/ds [r(s)] = (d/ds [mxx(s)], d/ds [myy(s)], d/ds [mzz(s)])
     # get discrete array of tangent vectors; __call__(xxx, 1) returns the first derivative
     dxx = scipy.interpolate.splev(ss, sxx, 1)
@@ -256,7 +256,7 @@ def get_sayar_writhe(splines1, smin, smax, splines2 = False, npoints = 1000, deb
     tt = range(len(ss))
     for ii in range(len(ss)):
         tt[ii] = np.array([dxx[ii], dyy[ii], dzz[ii]])
-    
+
     # do the double integration w.r.t. s and s'
     if integral_type == "simple":
         integral = 0
@@ -287,7 +287,7 @@ def get_sayar_writhe(splines1, smin, smax, splines2 = False, npoints = 1000, deb
         for ss_coarse in np.linspace(ss[0], ss[-1], 10):
             for ss_coarse_prime in np.linspace(ss[0], ss[-1], 10):
                 val, err = scipy.integrate.dblquad(writhe_integrand, ss_coarse, ss_coarse + float(ss[-1]-ss[0])/9, lambda x: ss_coarse_prime, lambda x: ss_coarse_prime + float(ss[-1]-ss[0])/9, args = (sxx, syy, szz, contour_len[-1]))
-                print err
+                print(err)
                 integral += val
     elif integral_type == "quad":
         integral, err = scipy.integrate.quad(writhe_integrand2, ss[0], ss[-1], args = (sxx, syy, szz, ss[0], ss[-1]), limit = 100, epsabs = 1e-5, epsrel = 0)
@@ -308,11 +308,11 @@ def get_sayar_writhe(splines1, smin, smax, splines2 = False, npoints = 1000, deb
         integral = scipy.integrate.simps(scipy.integrate.simps(integrand, ss), ss)
     else:
         assert False
-        
+
     writhe = float(integral) / (4*np.pi)
 
     return writhe
-    
+
 def get_vhelix_vis(fname):
     """
     read the 'virtual helix visibility' from a text file and ignore any virtual helices set to invisible
@@ -341,7 +341,7 @@ def get_vhelix_vis(fname):
     for line in lines:
         if '=' in line:
             sp = line.split("=")
-            one, two, three = [p.strip() for p in sp[0], '=', sp[1]]
+            one, two, three = [p.strip() for p in (sp[0], '=', sp[1])]
         else:
             one, two, three = line, "", ""
 
@@ -524,7 +524,7 @@ class vhelix_vbase_to_nucleotide(object):
     def add_scaf_strand(self, add_strand, reference, continue_join = False):
         count = 0
         size = len(self._scaf)
-        for (vh, vb), [strand_ind, nuc] in reference._scaf.iteritems():
+        for (vh, vb), [strand_ind, nuc] in reference._scaf.items():
             if strand_ind == add_strand:
                 self.add_scaf(vh, vb, self.strand_count, [x + self.nuc_count for x in nuc])
                 count += len(nuc)
@@ -539,7 +539,7 @@ class vhelix_vbase_to_nucleotide(object):
     def add_stap_strand(self, add_strand, reference, continue_join = False):
         count = 0
         size = len(self._stap)
-        for (vh, vb), [strand_ind, nuc] in reference._stap.iteritems():
+        for (vh, vb), [strand_ind, nuc] in reference._stap.items():
             if strand_ind == add_strand:
                 self.add_stap(vh, vb, self.strand_count, [x + self.nuc_count for x in nuc])
                 count += len(nuc)
@@ -578,7 +578,7 @@ class Origami(object):
             self.get_cad2cudadna(cad2cuda_file, visibility = visibility)
             # build list of complementary nucleotides (according to cadnano scheme)
             self.complementary_list = ["na" for x in range(self._sys._N)]
-            for (vhelix, vbase), (strand1, nucs1) in self._cad2cudadna._scaf.iteritems():
+            for (vhelix, vbase), (strand1, nucs1) in self._cad2cudadna._scaf.items():
                 try:
                     (strand2, nucs2) = self._cad2cudadna._stap[vhelix, vbase]
                     for i in range(len(nucs1)):
@@ -645,7 +645,7 @@ class Origami(object):
 #        for ii in self.vvib[0]:
 #            print self._cad2cudadna._stap[0,ii]
 #        exit(1)
-        
+
     def update_system(self, system):
         self._sys = system
 
@@ -762,7 +762,7 @@ class Origami(object):
         vhelix_nucid = nucs_count + last_vb_nuc_index
 
         return vhelix_nucid
-                           
+
     def prepare_principal_axes_calc():
         # get the central nucleotides that will (may) be used as reference points for the principal axes calculations
         com = np.array([0.,0.,0.])
@@ -787,7 +787,7 @@ class Origami(object):
         return minnucs
 
     def get_principal_axes(self, approxaxes, minnucs):
-        print "origami_utils.py: Origami.get_principal_axes: unsupported function, dying"
+        print("origami_utils.py: Origami.get_principal_axes: unsupported function, dying")
         sys.exit()
         # find moment of inertia tensor I, then eigenvectors are the principal axes
         # first get centre of mass
@@ -924,7 +924,7 @@ class Origami(object):
             row = self._vhelix_pattern[vh][0]
             col = self._vhelix_pattern[vh][1]
             # check for a virtual helix above the current one
-            result = [vh1 for vh1, (row1,col1) in self._vhelix_pattern.iteritems() if row1 == row - 1 and col1 == col]
+            result = [vh1 for vh1, (row1,col1) in self._vhelix_pattern.items() if row1 == row - 1 and col1 == col]
             if len(result) > 0:
                 # a virtual helix above the current one was found
                 vhin = result[0]
@@ -1142,26 +1142,26 @@ class Origami(object):
         launchargs = [PROCESSPROGRAM,infile ,'trajectory_file='+tempfile_obj.name,command_for_data]
 
         self._sys.map_nucleotides_to_strands()
-        
+
         try:
             open(infile)
         except:
             base.Logger.log("unable to find file %s, exit" % infile, base.Logger.CRITICAL)
             sys.exit()
-            
+
         # print system to temporary file so we don't have to scan through a huge trajectory file...
-	self._sys.print_lorenzo_output(tempfile_obj.name,'/dev/null')
-	tempfile_obj.flush()
+        self._sys.print_lorenzo_output(tempfile_obj.name,'/dev/null')
+        tempfile_obj.flush()
 
         # run DNAnalysis
-	myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	stdout,stderr = myinput.communicate()
-	linewise = stdout.split('\n')
-	self._sys.read_H_bonds(linewise[:-2])
+        myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout,stderr = myinput.communicate()
+        linewise = stdout.split('\n')
+        self._sys.read_H_bonds(linewise[:-2])
         # check for errors in DNAnalysis
-	for line in stderr.split('\n'):
-      	  if "CRITICAL" in line:
-              	  print line
+        for line in stderr.split('\n'):
+            if "CRITICAL" in line:
+                print(line)
 
         # fill in self.interaction_list
         self.interaction_list = [[] for x in range(self._sys._N)]
@@ -1303,8 +1303,8 @@ class Origami(object):
         """
         vh_pattern = self._vhelix_pattern
         vh_neighbours_below = [[] for x in range(max(vh_pattern.keys())+1)]
-        for vh, (row,col) in vh_pattern.iteritems():
-            neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.iteritems() if (row1 == row and (col1 - col) == 1) or ((row1 - row) == 1 and col1 == col)]
+        for vh, (row,col) in vh_pattern.items():
+            neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.items() if (row1 == row and (col1 - col) == 1) or ((row1 - row) == 1 and col1 == col)]
             for vh1 in neighbours:
                 vh_neighbours_below[vh].append(vh1)
 
@@ -1356,14 +1356,14 @@ class Origami(object):
             sys.exit()
         vh_pattern = self._vhelix_pattern
         vh_neighbour_list = [[] for x in range(max(vh_pattern.keys())+1)]
-        for vh, (row,col) in vh_pattern.iteritems():
+        for vh, (row,col) in vh_pattern.items():
             if type == "sq":
-                neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.iteritems() if (row1 == row and abs(col1 - col) == 1) or (abs(row1 - row) == 1 and col1 == col)]
+                neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.items() if (row1 == row and abs(col1 - col) == 1) or (abs(row1 - row) == 1 and col1 == col)]
             elif type == "he":
                 if vh % 2 == 0:
-                    neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.iteritems() if (row1 == row and abs(col1 - col) == 1) or (row1 == row - 1 and col1 == col)]
+                    neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.items() if (row1 == row and abs(col1 - col) == 1) or (row1 == row - 1 and col1 == col)]
                 if vh % 2 == 1:
-                    neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.iteritems() if (row1 == row and abs(col1 - col) == 1) or (row1 == row + 1 and col1 == col)]
+                    neighbours = [vh1 for vh1, (row1,col1) in vh_pattern.items() if (row1 == row and abs(col1 - col) == 1) or (row1 == row + 1 and col1 == col)]
             for vh1 in neighbours:
                 vh_neighbour_list[vh].append(vh1)
 
@@ -1450,7 +1450,7 @@ class Origami(object):
             d = (d1_in_plane + d2_in_plane)/2
             # include the excluded volume of the backbone site
             d += base.EXCL_S1/2
-            
+
         else:
             ss = self._sys
             n1 = self.get_nucleotides(self.vhelix_indices[vh_id], self.vvib[vh_id][vvib_id])[0]
@@ -1512,15 +1512,15 @@ class Origami(object):
 
     def get_weave(self, verbose=False):
         """
-        Return the weave pattern as a list of lists. Each pair of virtual 
+        Return the weave pattern as a list of lists. Each pair of virtual
         helices has a list associated with it. Each of those lists contains the
         interhelical distance as a function of base-pair index along the virtual
         helix.
-        
+
         This method copes with insertions/deletions by creating a list of base-
-        base midpoints for each virtual helix, and assuming that each pair of 
+        base midpoints for each virtual helix, and assuming that each pair of
         virtual helices has the same number of base-base midpoints. This should
-        mean that the base pairs are fairly well lined up and results in a 
+        mean that the base pairs are fairly well lined up and results in a
         reasonable definition of the weave pattern.
         """
         out = [[] for xx in range(len(self.vhelix_indices)-1)]
@@ -1543,7 +1543,7 @@ class Origami(object):
 
     def compute_vh_midpoints(self):
         """
-        compute the base pair midpoints for each virtual helix just once to 
+        compute the base pair midpoints for each virtual helix just once to
         save time
         """
         if self._sys:
@@ -1553,7 +1553,7 @@ class Origami(object):
 
     def get_vh_midpoints(self, vhi):
         """
-        Return a list of base pair midpoints for a virtual helix. Effectively 
+        Return a list of base pair midpoints for a virtual helix. Effectively
         'flattens' a virtual helix, dealing with any skips or loops.
         """
         bbms = []
@@ -1724,11 +1724,11 @@ class Origami(object):
 
     def intra_helix_autocorr(self):
         """
-        Get the autocorrelation (i.e. the dot product) between the intra-helix 
+        Get the autocorrelation (i.e. the dot product) between the intra-helix
         vectors along each pair of virtual helices in the origami.
 
         This method does assume that the base pairs on adjacent virtual helices
-        'line up,' in the sense that the list index of the closest base pair 
+        'line up,' in the sense that the list index of the closest base pair
         on one helix is the same as the index of the closest base pair on the
         neighbouring helix. A weak check for this is the condition that the
         lengths of the bbm lists (and so the number of base pairs in each virtual
@@ -1767,7 +1767,7 @@ class Origami(object):
 
     def corrugation(self, hj, span=16):
         """
-        Find the corrugation a distance span around the junction hj. The 
+        Find the corrugation a distance span around the junction hj. The
         corrugation pattern is quantified as the angle from the dot product between the average
         of the two intra-helix vectors at the junction and each of the other
         intra-helix vectors.
@@ -1781,7 +1781,7 @@ class Origami(object):
 
         # label the base pairs like this
         # ===A-B==>
-        #    | | 
+        #    | |
         # <==C-D===
         bbmA = self.get_bb_midpoint(self.get_nucleotides(vh1, vb1)[0], pbc=True)
         bbmB = self.get_bb_midpoint(self.get_nucleotides(vh1, vb2)[0], pbc=True)
@@ -1791,7 +1791,7 @@ class Origami(object):
         # average of the helix axes at the junction
         av_axis = norm(norm(self.min_distance(bbmA, bbmB)) + norm(self.min_distance(bbmC, bbmD)))
 
-        # find component of reference intrahelix vector that is in the plane 
+        # find component of reference intrahelix vector that is in the plane
         # normal to av_axis
         ref_intra = self.min_distance(bbmC, bbmA) + self.min_distance(bbmD, bbmB)
         ref_intra_in_plane = norm(ref_intra - np.dot(ref_intra, av_axis) * av_axis)
@@ -1821,7 +1821,7 @@ class Origami(object):
         vector at xpos with the reference vector, after both have been projected
         into the plane perpendicular to the average helix axis at the junction.
         """
-        # the if condition is here to ensure we don't have a negative 
+        # the if condition is here to ensure we don't have a negative
         # index (which with python logic gets treated as the penultimate
         # list element) and that we don't run off the end of the list
         if id1 + xpos > 0 and id1 + xpos < len(bbms1) and id2 + xpos > 0 and id2 + xpos < len(bbms2):
@@ -1900,11 +1900,11 @@ class Origami(object):
                 vb += increment
             except IndexError:
                 print >> sys.stderr, "This error is likely to be caused by not running get_h_bond_list first, or (much less likely) because there are no native bonds for this virtual helix."
-                print vhi, vb
+                print(vhi, vb)
                 raise
         #print "nnb", vhi, vb, n1, n2
         return n1, n2
-    
+
     def get_av_helix_axis(self, vhelix_extent = False, discard_unbonded = True):
         """
         find the average helix axis. Optionally discard unbonded (but designed) 'base-pairs', and ignore the regions outside the 'vhelix_extent'
@@ -1928,10 +1928,10 @@ class Origami(object):
 
             # find the vector between the two base-pairs
             av_helix_axis += min_distance(bbm1, bbm2, self._sys._box)
-            
+
         av_helix_axis /= len(self.vhelix_indices)
         return av_helix_axis
-    
+
     def get_3d_twist(self, f_edge_vh, vhelix_extent = False, discard_unbonded = True):
         """
         return the 3d global twist (top-bottom and left-right)
@@ -1949,7 +1949,7 @@ class Origami(object):
             strand.translate(to_translate)
 
         av_helix_axis = self.get_av_helix_axis(vhelix_extent, discard_unbonded)
-        
+
         vhelices1, vhelices2 = self.parse_vh_edge(f_edge_vh)
 
         if vhelix_extent:
@@ -2085,7 +2085,7 @@ class Origami(object):
         """
         nicks = self.get_nicks()
         return len(nicks[0]) + len(nicks[1])
-    
+
     def get_nicks(self):
         """
         return a list [scaffold_nicks, staple_nicks], each of which is a list of nicked neighbours in the origami
@@ -2105,7 +2105,7 @@ class Origami(object):
                     # check for staple nick
                     if (self.is_strand_end(vh, vb, "staple") == "first" and self.is_strand_end(vh, vb + 1, "staple") == "last") or (self.is_strand_end(vh, vb, "staple") == "last" and self.is_strand_end(vh, vb + 1, "staple") == "first"):
                         stap_nicks.append([vh, vb, vb + 1])
-                        
+
         return scaf_nicks, stap_nicks
 
     def is_nicked(self, vh, vb1, vb2):
@@ -2115,11 +2115,11 @@ class Origami(object):
         # check for scaffold nick
         if (self.is_strand_end(vh, vb1, "scaffold") == "first" and self.is_strand_end(vh, vb2, "scaffold") == "last") or (self.is_strand_end(vh, vb1, "scaffold") == "last" and self.is_strand_end(vh, vb2, "scaffold") == "first"):
             return True
-        
+
         # check for staple nick
         if (self.is_strand_end(vh, vb1, "staple") == "first" and self.is_strand_end(vh, vb2, "staple") == "last") or (self.is_strand_end(vh, vb1, "staple") == "last" and self.is_strand_end(vh, vb2, "staple") == "first"):
             return True
-            
+
         return False
 
     def check_branch_migration_strict(self, vh1, vb1, vh2, vb2):
@@ -2203,7 +2203,7 @@ class Origami(object):
         for str in f.readline().replace(" ", "").split(","):
             i = int(str)
             vhelix_extent.append(i)
-            
+
         assert len(vhelix_extent) == 2
 
         vh_begin_raw = vhelix_extent[0]
@@ -2247,7 +2247,7 @@ class Origami(object):
 
         if discard_unbonded:
             assert self.interaction_list[0] != -1, "If using discard_unbonded, make sure that you run Origami.get_h_bond_list() or similar first to fill in the interaction list"
-            
+
         if mode == "midpoint":
             bbms = []
             for vb in self.vvib[vhi]:
@@ -2283,7 +2283,7 @@ class Origami(object):
 
     def get_n_bp(self, vh):
         """
-        Return the number of base pairs in the virtual helix with number 
+        Return the number of base pairs in the virtual helix with number
         'vh'
         """
         nucs = []

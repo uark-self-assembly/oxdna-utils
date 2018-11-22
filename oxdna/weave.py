@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # detect weave pattern in 2D origami
 # NB consider what happens when bp are not hybridised
@@ -23,7 +23,7 @@ def get_bb_midpoint(system, strand, n_index):
     return vec
 
 if (len(sys.argv) < 5):
-  print 'Usage %s trajectory topology input output' % sys.argv[0]
+  print('Usage %s trajectory topology input output' % sys.argv[0])
   sys.exit()
 
 conffile = sys.argv[1]
@@ -35,7 +35,7 @@ s = myreader.get_system()
 scaf_index = oru.get_scaffold_index(s)
 
 if not os.path.isfile(PROCESSDIR + "output_bonds"):
-	print "Cannot execute output_bonds program. Please make sure to go to process_data/ directory and type make"
+	print("Cannot execute output_bonds program. Please make sure to go to process_data/ directory and type make")
 	sys.exit(1)
 
 if not os.path.isfile(infile):
@@ -100,8 +100,8 @@ while s != False:
                     vecdist = get_bb_midpoint(s, s._strands[scaf_index], n1) - get_bb_midpoint(s, s._strands[scaf_index], n2)
                 except IndexError:
                     base.Logger.log("IndexError while getting distance between bps - debug output:", base.Logger.CRITICAL)
-                    print i, nucleotide, dir, vhelix_indices[i], vhelix_indices[i+1]
-                    print n1, n2
+                    print(i, nucleotide, dir, vhelix_indices[i], vhelix_indices[i+1])
+                    print(n1, n2)
                     sys.exit()
                 dist[i][nucleotide] += np.sqrt(np.dot(vecdist,vecdist))
                 data_counter[i][nucleotide] += 1
@@ -113,7 +113,7 @@ fout = open(outfile, "w")
 for j in range(len(dist[0])):
     for i in range(len(dist)):
         if data_counter[i][j] != conf_counter:
-            print data_counter[i][j], i, j
+            print(data_counter[i][j], i, j)
         if data_counter[i][j] != 0:
             out_ij = dist[i][j]/data_counter[i][j]
         else:

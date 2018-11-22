@@ -1,17 +1,17 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # this script just reads the energy line in a trajectory and spits 
 # something similar to an energy.dat file
 
 import sys
 
 if len (sys.argv) < 2:
-    print >> sys.stderr, "Usage: ", sys.argv[0], "<trajectory_file>"
+    print("Usage: ", sys.argv[0], "<trajectory_file>", file=sys.stderr)
     sys.exit (-1)
 
 try:
     inp = open (sys.argv[1], 'r')
 except:
-    print >> sys.stderr, "Could not open ", sys.argv[1], "Aborting"
+    print("Could not open ", sys.argv[1], "Aborting", file=sys.stderr)
     sys.exit (-2)
 
 info = [[]]
@@ -29,7 +29,7 @@ while line:
 
 for t in info:
     try:
-        print t[0], t[1]
+        print(t[0], t[1])
     except:
         if t:
             print >> sys.stderr, "skipped", t

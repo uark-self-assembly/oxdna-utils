@@ -1,11 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 
 import sys
 import math
 saltcon = 0.50
 if len(sys.argv) < 3:
-	print 'Usage: ./program LENGTH box [salt, default 0.5]'
+	print('Usage: ./program LENGTH box [salt, default 0.5]')
 	sys.exit(1)
 
 box = float(sys.argv[2])
@@ -24,9 +24,9 @@ DS = (-22.0188*length + 1.2) + saltcorr
 
 RealTemp = (DH )*1000 / (DS + 1.9859* math.log(molcon/4) )
 
-print 'Salt concentration = ', str(saltcon)
-print 'T = ',str(RealTemp)+'K'
-print RealTemp - 273.15
+print('Salt concentration = ', str(saltcon))
+print('T = ',str(RealTemp)+'K')
+print(RealTemp - 273.15)
 
 # ----- why do we use length - 1?
 # In the SantaLucia model (described in the paper "THE THERMODYNAMICS OF

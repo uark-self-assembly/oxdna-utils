@@ -1,4 +1,4 @@
-#!/usr/bin/env python2 
+#!/usr/bin/env python3
 
 # This is EXCUSAGE, as in EXclusively Complementary Useful StrAnd GEnerator
 
@@ -13,12 +13,12 @@ ALLOWED = 2
 
 def get_nbp (u, v):
     n = 0
-    #for off in xrange(-LENGTH + 1, LENGTH):
-    #    for i in xrange(0, LENGTH):
+    #for off in range(-LENGTH + 1, LENGTH):
+    #    for i in range(0, LENGTH):
     #        if i > 0 and i+off > 0 and i+off < LENGTH:
     #            if u[i] + v[i + off] == 3:
     #                n += 1
-    for i in xrange(0, LENGTH):
+    for i in range(0, LENGTH):
         if u[i] + v[i] == 3:
             n += 1
     return n
@@ -26,7 +26,7 @@ def get_nbp (u, v):
 seqs, cseqs = [], []
 trials = 0
 while len(seqs) < NSEQS:
-    prova = [random.randint (0, 3) for i in xrange(LENGTH)]
+    prova = [random.randint (0, 3) for i in range(LENGTH)]
     check = True
     for s in seqs + cseqs:
         if get_nbp(prova, s) > ALLOWED:
@@ -34,7 +34,7 @@ while len(seqs) < NSEQS:
     if check:
         seqs.append(prova)
         cseqs.append([3 - x for x in prova])
-        print >> sys.stderr,"ADDED sequence ", prova, len(seqs)
+        print("ADDED sequence ", prova, len(seqs), file=sys.stderr)
     else:
         pass
         #print >> sys.stderr,"REFUSED sequence", len(seqs)
@@ -42,19 +42,18 @@ while len(seqs) < NSEQS:
     if trials > MAXTRIALS * NSEQS:
         seqs, cseqs = [], []
         trials = 0
-        print >> sys.stderr,"TOO MANY TRIALS, RESETTING"
+        print("TOO MANY TRIALS, RESETTING", file=sys.stderr)
 
 
-print >> sys.stderr,"DONE"
+print("DONE", file=sys.stderr)
 import base
 
-for i in xrange(NSEQS):
+for i in range(NSEQS):
     str = ""
     for x in seqs[i]:
         str += base.number_to_base[x]
-    print str
+    print(str)
     str = ""
     for x in cseqs[i]:
         str += base.number_to_base[x]
-    print str
-
+    print(str)

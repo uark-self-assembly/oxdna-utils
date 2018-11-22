@@ -68,7 +68,7 @@ class vhelix (object):
         elif which == 'scaf':
             self.scaf.append (toadd)
         else:
-            print >> sys.stderr, "cannot add square that is not scaf or stap. Dying now"
+            print("cannot add square that is not scaf or stap. Dying now", file=sys.stderr)
             sys.exit (-1)
     
     def __str__ (self):
@@ -140,13 +140,13 @@ class square (object):
 
 def parse_cadnano (path):
     if not isinstance (path, str):
-        print >> sys.stderr, "must be a path. Aborting"
+        print("must be a path. Aborting", file=sys.stderr)
         sys.exit (-1)
     
     try:
         inp = open (path, 'r')
     except:
-        print >> sys.stderr, "Could not open", path, "Aborting now"
+        print("Could not open", path, "Aborting now", file=sys.stderr)
         sys.exit (-1)
     
     string = ''
@@ -271,7 +271,7 @@ if len(sequences) == 1 and len(cadsys.vhelices) > 1:
 for sequence in sequences:
     if len(sequence) != cadsys.vhelices[0].len and not single_strand_system:
         base.Logger.log("sequence lengths in sqs file and cadnano file do not match", base.Logger.WARNING)
-        print "virtual helix length:" + str(cadsys.vhelices[0].len) + ", sequence length:" + str(len(sequence))
+        print("virtual helix length:" + str(cadsys.vhelices[0].len) + ", sequence length:" + str(len(sequence)))
 
 vhelix_counter = 0
 side = 40#cadsys.bbox ()
@@ -531,7 +531,7 @@ for a in range(2):
         absolute_bb_dist = np.sqrt(np.dot(backbone_backbone_dist, backbone_backbone_dist))
         if absolute_bb_dist > 1.0001 or absolute_bb_dist < 0.5525:
             base.Logger.log("backbone-backbone distance across join the wrong length", base.Logger.WARNING)
-            print "backbone-backbone distance: " + str(absolute_bb_dist)
+            print("backbone-backbone distance: " + str(absolute_bb_dist))
 
     # match up all the pairs of joins that involve the same strand
     while all_are_joined == False:
@@ -571,7 +571,7 @@ if sequence_file and single_strand_system:
 final_sys.print_lorenzo_output ("prova.conf", "prova.top")
 final_sys.print_vmd_xyz_output ('gino.xyz', same_colors=True)
 
-print "number of strands: " + str(len(final_sys._strands))
+print("number of strands: " + str(len(final_sys._strands)))
 if len(final_sys._strands) > 1 and single_strand_system:
     base.Logger.log("wrongly assumed single strand system when setting sequences", base.Logger.WARNING)
 # python traj2tcl-detailed.py prova.conf prova.top caca.tcl cdmto0

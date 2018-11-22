@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -12,9 +12,9 @@ import getopt
 import subprocess as sp
 
 def print_usage():
-    print "USAGE:"
-    print "\t%s configuration topology [--help] [--fps=3] [--width=500]" % sys.argv[0]
-    print "\t[--heigh=500] [--crepy=crepy.py] [--crepyopts=''] [--skip=0]\n"
+    print("USAGE:")
+    print("\t%s configuration topology [--help] [--fps=3] [--width=500]" % sys.argv[0])
+    print("\t[--heigh=500] [--crepy=crepy.py] [--crepyopts=''] [--skip=0]\n")
     sys.exit(1)
 
 shortArgs = ''
@@ -79,10 +79,10 @@ base.Logger.log("Enconding movie...")
 # costruiamo la lista
 f = open ("__ginocchio__", "w")
 for p in pngfiles:
-    print >> f, p
+    print(p, file=f)
 f.close ()
 
-print "mencoder mf://@__ginocchio__ -mf w=%s:h=%s:fps=%s:type=png -ovc xvid -xvidencopts bitrate=200 -o output.avi" % (str(width), str(height), str(fps))
+print("mencoder mf://@__ginocchio__ -mf w=%s:h=%s:fps=%s:type=png -ovc xvid -xvidencopts bitrate=200 -o output.avi" % (str(width), str(height), str(fps)))
 
 #b = sp.Popen ("/usr/bin/mencoder mf://@__ginocchio__ -mf w=%s:h=%s:fps=%s:type=png -ovc xvid -xvidencopts bitrate=200 -o output.avi" % (str(width), str(height), str(fps)))
 b = sp.Popen (["mencoder", "mf://@__ginocchio__", "-mf","w=%s:h=%s:fps=%s:type=png" % (str(width), str(height), str(fps)), "-ovc", "xvid", "-xvidencopts", "bitrate=200", "-o", "output.avi"])

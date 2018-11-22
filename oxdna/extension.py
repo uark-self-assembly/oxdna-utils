@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -31,11 +31,11 @@ while s:
 '''
 
 if len(traps) < 2:
-    print >> sys.stderr, "there are less than 2 traps. Aborting..."
+    print("there are less than 2 traps. Aborting...", file=sys.stderr)
     sys.exit (-1)
 
 if traps[0].type != traps[1].type:
-    print >> sys.stderr, "trap types don't match. Aborting..."
+    print("trap types don't match. Aborting...", file=sys.stderr)
     sys.exit (-2)
 
 i1 = traps[0].particle
@@ -49,11 +49,11 @@ while s:
     dr = n1.distance (n2, PBC=False)
     #dr = s._nucleotides[n1].distance (s._nucleotides[n2], PBC=False)
     if traps[0].type == 'string':
-        print s._time, np.sqrt(np.dot(dr, dr)), dr[0], dr[1], dr[2]
+        print(s._time, np.sqrt(np.dot(dr, dr)), dr[0], dr[1], dr[2])
     elif traps[0].type == 'trap':
         f1 = traps[0].get_force (n1.cm_pos)
         f2 = traps[1].get_force (n2.cm_pos)
-        print s._time, np.sqrt(np.dot(dr, dr)), f1[0], f1[1], f1[2], f2[0], f2[1], f2[2] 
+        print(s._time, np.sqrt(np.dot(dr, dr)), f1[0], f1[1], f1[2], f2[0], f2[1], f2[2])
     else:
         pass
     s = l.get_system()

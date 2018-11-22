@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -22,13 +22,13 @@ nn = int (lines[0].split()[0])
 ns = int (lines[0].split()[1])
 base.Logger.log ('detected %i strands and a total of %i nucleotides' % (ns, nn))
 
-sqs = ['' for i in xrange (ns)]
+sqs = ['' for i in range (ns)]
 for line in lines[1:]:
     words = line.split()
     index = int(words[0]) - 1
     sqs[index] += words[1]
 
 for s in sqs:
-    print s
+    print(s)
 
 inp.close ()

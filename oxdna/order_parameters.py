@@ -29,7 +29,7 @@ class NEAR_HBONDS_Parameter:
 		self.nuc1 = int(vals[2])
 		self.sid2 = int(vals[3])
 		self.nuc2 = int(vals[4])
-		self.state = 0 
+		self.state = 0
 
 	def get_state (self, system):
 		self.nucleotide_id1 = system._strands[self.sid1]._nucleotides[self.nuc1].index
@@ -80,15 +80,15 @@ class DISTANCE_Parameter:
 		self.nuc1 = int(vals[2]);
 		self.sid2 = int(vals[3]);
 		self.nuc2 = int(vals[4]);
-		
-		self.state = -1 
+
+		self.state = -1
 
 	def get_state(self,system):
 		self.state = l2norm(system._strands[self.sid1]._nucleotides[self.nuc1].distance(system._strands[self.sid2]._nucleotides[self.nuc2],True,system._box))
 		return self.state
 
 	def get_type(self):
-		return "DISTANCE"	 
+		return "DISTANCE"
 
 
 class BASEDISTANCE_Parameter:
@@ -102,18 +102,18 @@ class BASEDISTANCE_Parameter:
 		self.nuc1 = int(vals[2]);
 		self.sid2 = int(vals[3]);
 		self.nuc2 = int(vals[4]);
-		
-		self.state = -1 
+
+		self.state = -1
 
 	def get_state(self,system):
-		
-        	dr = system._strands[self.sid1]._nucleotides[self.nuc1].get_pos_base()  -  system._strands[self.sid2]._nucleotides[self.nuc2].get_pos_base()
-       		dr -= system._box * np.rint (dr / system._box)
+
+		dr = system._strands[self.sid1]._nucleotides[self.nuc1].get_pos_base()  -  system._strands[self.sid2]._nucleotides[self.nuc2].get_pos_base()
+		dr -= system._box * np.rint (dr / system._box)
 		self.state = l2norm(dr)
 		return self.state
 
 	def get_type(self):
-		return "BASEDISTANCE"	 
+		return "BASEDISTANCE"
 
 
 class ALL_HBONDS_Parameter:
@@ -123,12 +123,12 @@ class ALL_HBONDS_Parameter:
 		self.name = vals[0];
 		self.sid1 = int(vals[1])
 		self.sid2 = int(vals[2])
-	
+
 	def get_state(self,system):
 		inters =  system._strands[self.sid1].get_H_interactions()
 		if self.sid2 in inters.keys():
 			self.state = inters[self.sid2]
-		else: 
+		else:
 			self.state = 0
 		return self.state
 
@@ -145,7 +145,7 @@ class EVALUATED_Parameter:
 		self.state  = 0
 		self.par_dictionary = {}
 		for key, val in par_dictionary.items():
-			self.par_dictionary[key] = val 
+			self.par_dictionary[key] = val
 
 	def get_type(self):
 		return "EVALUATED"
@@ -168,7 +168,7 @@ class OrderParameters:
 						self.parameters[key] = val
 			elif isinstance(pars, str):
 				self.read_order_parameters_from_file(pars)
-			else:	
+			else:
 				raise IOError('Invalid format of input argument in OrderParameters init')
 
 	def get_order_parameter(self, parameter_id):
@@ -185,17 +185,17 @@ class OrderParameters:
 
 	def get_state(self, key, system):
 		return self.parameters[key].get_state(system)
-	
+
 	def __getitem__(self,key):
 		return self.parameters[key]
 
 	def items(self):
 		return self.parameters.items()
 
-	def keys(self): 
+	def keys(self):
 		return self.parameters.keys()
 
-	#Those are parameter processing functions for loading from file	
+	#Those are parameter processing functions for loading from file
 	def add_order_parameter(self,ordertype,line):
 		pamid = line.split()[0]
 		if(pamid in self.parameters.keys()):
@@ -215,7 +215,7 @@ class OrderParameters:
 			self.parameters[pamid] = nparam
 		elif ordertype == "EVALUATED":
 			parameter = line.rstrip().replace(pamid,' ')
-						
+
 			for par in self.parameters.keys():
 					parameter = parameter.replace('$('+par+')',par+'.get_state(_system)')
 			nparam = EVALUATED_Parameter(parameter,pars)
@@ -239,7 +239,7 @@ class OrderParameters:
 						ordertype = "NEAR_HBONDS"
 					elif (linet.strip() == 'ALL_HBONDS'):
 						ordertype = 'ALL_HBONDS'
-					else:	
+					else:
 						self.add_order_parameter(ordertype,line)
 
 
@@ -249,14 +249,14 @@ class EVALUATED_Weight:
 			raise IOError('Incorrect weight')
 		self.name = name
 		self.params = params
-		self.key_command = param_command	
+		self.key_command = param_command
 		for par in params.keys():
 			param_command = param_command.replace('$('+par+')',par+'.get_state(_system)')
 			self.key_command = self.key_command.replace('$('+par+')',' ' + par +' ' )
 		self.command = param_command
 		self.par_dictionary = {}
 		for key,val in params.items():
-			self.par_dictionary[key] = val 
+			self.par_dictionary[key] = val
 
 	def get_value(self,system,order_par_obj):
 		self.par_dictionary['_system'] = system
@@ -288,7 +288,7 @@ class DICT_Weight:
 		else:
 			raise ValueError ("Could not build DICT_Weight")
 		self.dict_vals = dict_vals
-	
+
 	def get_value (self, system, order_par_obj):
 		indextuple = []
 		for par in self.index_names:
@@ -302,7 +302,7 @@ class DICT_Weight:
 			#print order_par_obj.get_state (par, system)
 			#print >> sys.stderr, "got unknown key", key
 		if not (isinstance(result,int) or isinstance(result,float)):
-			print 'Warning, weight ', self.name, '  inadmissible index detected ', indextuple, 'using weight 1'
+			print('Warning, weight ', self.name, '  inadmissible index detected ', indextuple, 'using weight 1')
 			result = 1.0
 		return result
 
@@ -317,7 +317,7 @@ class DICT_Weight:
 		except KeyError:
 			result = max (self.dict_vals.values())
 		if not (isinstance(result,int) or isinstance(result,float)):
-			print 'Warning, weight ', self.name, '  inadmissible index detected ', indextuple, 'using weight 1'
+			print('Warning, weight ', self.name, '  inadmissible index detected ', indextuple, 'using weight 1')
 			result = 1.0
 		return result
 
@@ -399,7 +399,7 @@ def load_system (inputfile, conffile, topologyfile):
 	myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	if myinput.wait () != 0:
 		for line in myinput.stderr.readlines():
-			print line,
+			print(line,)
 		raise IOError ('Critical Error')
 	system.read_all_interactions(myinput.stdout.readlines())
 	return system
@@ -414,29 +414,29 @@ def load_energies_to_system (inputfile, conffile,system,iteration_id=0):
 		system.read_all_interactions(myinput.stdout.readlines())
 		for line in myinput.stderr.readlines():
 			if "CRITICAL" in line:
-				print "Critical error"
+				print("Critical error")
 				raise IOError
-		return system	
+		return system
 
 def complementary_bonds_between_strands(system,name,strand_id1,strand_id2,start=0,offset=0,include_all_parameters=False):
 	#by default, this makes a bond between the first nucleotide of strand_id1 with the last bond of strand_id2
 	subpars = {}
 	#out.write('HBONDS \n')
-	names = []	
+	names = []
 	for i in range(len(system._strands[strand_id1]._nucleotides) - start - offset):
 		index_a = i + start
 		index_b = len(system._strands[strand_id2]._nucleotides) - offset - i - 1
 		if(index_a >= len(system._strands[strand_id1]._nucleotides) or index_b < 0):
-			print 'Reached impossible indexes', index_a, ' ' , index_b, ' not including them'
+			print('Reached impossible indexes', index_a, ' ' , index_b, ' not including them')
 			continue
 		bondname = name + 'cHB_S' + str(strand_id1) + 'N' + str(index_a) + 'S' + str(strand_id2) + 'N' + str(index_b)
 		param = HBONDS_Parameter('%s %d %d %d %d' % (bondname,strand_id1,index_a,strand_id2,index_b) )
 		subpars[bondname] = param
 		names.append(bondname)
 		if(system._strands[strand_id1]._nucleotides[index_a]._base + system._strands[strand_id2]._nucleotides[index_b]._base != 3):
-			print 'Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary'
+			print('Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary')
 
-	evalpam =  ' $(' + names[0]+')'	
+	evalpam =  ' $(' + names[0]+')'
 	for bond in names[1:]:
 		evalpam += ' + $('+ bond +')'
 	if include_all_parameters:
@@ -447,7 +447,7 @@ def complementary_bonds_between_strands(system,name,strand_id1,strand_id2,start=
 
 def all_bonds_between_strands(system,name,strand_id1,strand_id2):
 	if strand_id1 >= system._N or strand_id2 >= system._N:
-		print 'Error while constructing order parameter, strand index is incorrect'
+		print('Error while constructing order parameter, strand index is incorrect')
 		raise IOError('Incorrect index')
 	else:
 		return {name:ALL_HBONDS_Parameter(name+' '+str(strand_id1) + ' ' +str(strand_id2))}
@@ -455,15 +455,15 @@ def all_bonds_between_strands(system,name,strand_id1,strand_id2):
 
 def array_of_complementary_bonds_between_strands(system,name,strand_id1,strand_id2,start=0,offset=0):
 	#by default, this makes a bond between the first nucleotide of strand_id1 with the last bond of strand_id2
-        subpars = {}
+	subpars = {}
 	#out.write('HBONDS \n')
 	names = []
-	params = []	
+	params = []
 	for i in range(len(system._strands[strand_id1]._nucleotides) - start - offset):
 		index_a = i + start
 		index_b = len(system._strands[strand_id2]._nucleotides) - offset - i - 1
 		if(index_a >= len(system._strands[strand_id1]._nucleotides) or index_b < 0):
-			print 'Reached impossible indexes', index_a, ' ' , index_b, ' not including them'
+			print('Reached impossible indexes', index_a, ' ' , index_b, ' not including them')
 			continue
 		bondname = name + 'cHB_S' + str(strand_id1) + 'N' + str(index_a) + 'S' + str(strand_id2) + 'N' + str(index_b)
 		param = HBONDS_Parameter('%s %d %d %d %d' % (bondname,strand_id1,index_a,strand_id2,index_b) )
@@ -471,40 +471,40 @@ def array_of_complementary_bonds_between_strands(system,name,strand_id1,strand_i
 		params.append(param)
 		names.append(bondname)
 		if(system._strands[strand_id1]._nucleotides[index_a]._base + system._strands[strand_id2]._nucleotides[index_b]._base != 3):
-			print 'Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary'
+			print('Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary')
 
 
-	evalpam =  ' $(' + names[0]+')'	
+	evalpam =  ' $(' + names[0]+')'
 	for bond in names[1:]:
-		evalpam += ' + $('+ bond +')' 
-	
-	subpars[name] = EVALUATED_Parameter(evalpam,subpars)
-	return subpars,params		
+		evalpam += ' + $('+ bond +')'
 
-	
+	subpars[name] = EVALUATED_Parameter(evalpam,subpars)
+	return subpars,params
+
+
 
 def minimum_distance_between_num_bases(system,name,strand_id1,strand_id2,start_A=0,offset_B=0,number_of_bases=1,include_all_parameters=False):
 	#by default, this makes a distance between the first nucleotide of strand_id1 with the last bond of strand_id2
 	names = []
-	subpars = {}	
+	subpars = {}
 	for i in range(number_of_bases):
 		index_a = i + start_A
 		index_b = len(system._strands[strand_id2]._nucleotides) - offset_B - i - 1
 		if(index_a >= len(system._strands[strand_id1]._nucleotides) or index_b < 0):
-			print 'Reached impossible indexes', index_a, ' ' , index_b, ' not including them'
+			print('Reached impossible indexes', index_a, ' ' , index_b, ' not including them')
 			continue
 		bondname = name + '_D_S' + str(strand_id1) + 'N' + str(index_a) + 'S' + str(strand_id2) + 'N' + str(index_b)
-		subpars[bondname] = BASEDISTANCE_Parameter('%s %d %d %d %d ' % (bondname,strand_id1,index_a,strand_id2,index_b) ) 
+		subpars[bondname] = BASEDISTANCE_Parameter('%s %d %d %d %d ' % (bondname,strand_id1,index_a,strand_id2,index_b) )
 		names.append(bondname)
 		#print strand_id1, ' ' , strand_id2, ' ',index_a, index_b
 		if(system._strands[strand_id1]._nucleotides[index_a]._base + system._strands[strand_id2]._nucleotides[index_b]._base != 3):
-			print 'Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary'
+			print('Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary')
 
-	evalpam =  ' min( $(' + names[0]+')'	
+	evalpam =  ' min( $(' + names[0]+')'
 	for bond in names[1:]:
 		evalpam += ' , $('+ bond +')'
 	evalpam += ')'
- 
+
 	if include_all_parameters:
 		subpars[name] = EVALUATED_Parameter(evalpam,subpars)
 		return subpars
@@ -515,25 +515,25 @@ def minimum_distance_between_num_bases(system,name,strand_id1,strand_id2,start_A
 def minimum_distance_between_complementary_bases(system,name,strand_id1,strand_id2,start=0,offset=0,include_all_parameters=False):
 	#by default, this makes a distance between the first nucleotide of strand_id1 with the last bond of strand_id2
 	names = []
-	subpars = {}	
+	subpars = {}
 	for i in range(len(system._strands[strand_id1]._nucleotides) - start - offset):
 		index_a = i + start
 		index_b = len(system._strands[strand_id2]._nucleotides) - offset - i - 1
 		if(index_a >= len(system._strands[strand_id1]._nucleotides) or index_b < 0):
-			print 'Reached impossible indexes', index_a, ' ' , index_b, ' not including them'
+			print('Reached impossible indexes', index_a, ' ' , index_b, ' not including them')
 			continue
 		bondname = name + '_D_S' + str(strand_id1) + 'N' + str(index_a) + 'S' + str(strand_id2) + 'N' + str(index_b)
-		subpars[bondname] = DISTANCE_Parameter('%s %d %d %d %d ' % (bondname,strand_id1,index_a,strand_id2,index_b) ) 
+		subpars[bondname] = DISTANCE_Parameter('%s %d %d %d %d ' % (bondname,strand_id1,index_a,strand_id2,index_b) )
 		names.append(bondname)
 		#print strand_id1, ' ' , strand_id2, ' ',index_a, index_b
 		if(system._strands[strand_id1]._nucleotides[index_a]._base + system._strands[strand_id2]._nucleotides[index_b]._base != 3):
-			print 'Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary'
+			print('Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary')
 
-	evalpam =  ' min( $(' + names[0]+')'	
+	evalpam =  ' min( $(' + names[0]+')'
 	for bond in names[1:]:
 		evalpam += ' , $('+ bond +')'
 	evalpam += ')'
- 
+
 	if include_all_parameters:
 		subpars[name] = EVALUATED_Parameter(evalpam,subpars)
 		return subpars
@@ -544,27 +544,27 @@ def minimum_distance_between_complementary_bases(system,name,strand_id1,strand_i
 def minimum_distance_between_bases(system,name,indices,include_all_parameters=False):
 	#by default, this makes a distance between the first nucleotide of strand_id1 with the last bond of strand_id2
 	names = []
-	subpars = {}	
+	subpars = {}
 	for i in indices:
 		strand_id1 = i[0]
 		index_a = i[1]
 		strand_id2 = i[2]
 		index_b = i[3]
 		if(index_a >= len(system._strands[strand_id1]._nucleotides) or index_b < 0):
-			print 'Reached impossible indexes', index_a, ' ' , index_b, ' not including them'
+			print('Reached impossible indexes', index_a, ' ' , index_b, ' not including them')
 			continue
 		bondname = name + '_D_S' + str(strand_id1) + 'N' + str(index_a) + 'S' + str(strand_id2) + 'N' + str(index_b)
-		subpars[bondname] = BASEDISTANCE_Parameter('%s %d %d %d %d ' % (bondname,strand_id1,index_a,strand_id2,index_b) ) 
+		subpars[bondname] = BASEDISTANCE_Parameter('%s %d %d %d %d ' % (bondname,strand_id1,index_a,strand_id2,index_b) )
 		names.append(bondname)
 		#print strand_id1, ' ' , strand_id2, ' ',index_a, index_b
 		if(system._strands[strand_id1]._nucleotides[index_a]._base + system._strands[strand_id2]._nucleotides[index_b]._base != 3):
-			print 'Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary'
+			print('Warning, bases ',index_a ,' and ', index_b, ' on the strands are not complementary')
 
-	evalpam =  ' min( $(' + names[0]+')'	
+	evalpam =  ' min( $(' + names[0]+')'
 	for bond in names[1:]:
 		evalpam += ' , $('+ bond +')'
 	evalpam += ')'
- 
+
 	if include_all_parameters:
 		subpars[name] = EVALUATED_Parameter(evalpam,subpars)
 		return subpars
@@ -596,11 +596,11 @@ class Histo:
             row.append (self.data[k])
             row.append (self.unbiased[k])
             flat.append (row)
-        
+
         # a bit of sorting
         flat.sort()
         return flat
-     
+
     def flatten_old (self):
         # we need an array with the names of the order parameters
         unames = []
@@ -609,7 +609,7 @@ class Histo:
                 if unames.count (subkey[0]) == 0:
                     unames.append (subkey[0])
         unames.sort () # we always sort them
-        
+
         # let's build a dictionary with the maximum and minimum
         # values assumed by the order parameters
         maxs, mins = {}, {}
@@ -618,7 +618,7 @@ class Histo:
         #maxs = [None for u in unames] # anything is > None
         for key, val in self.data.items():
             for subkey in key:
-                print '@@', subkey
+                print('@@', subkey)
                 if subkey[1] > maxs[unames.index(subkey[0])]:
                     maxs[unames.index(subkey[0])] = subkey[1]
         for u in unames:
@@ -631,43 +631,43 @@ class Histo:
         nrows = 1
         for i in unames:
             nrows *= (maxs[u] - mins[u] + 1)
-        
+
         flat = []
-        
-        for i in xrange (nrows):
+
+        for i in range (nrows):
             toappend = []
             larger = 1
-            for j in xrange (len (unames)):
+            for j in range (len (unames)):
                 interval = maxs[j] - mins[j] + 1
                 toappend.append (mins[j] + (i/larger) % interval)
                 larger *= interval
-            
-            mykey = tuple([(unames[k], toappend[k]) for k in xrange (len (unames))])
+
+            mykey = tuple([(unames[k], toappend[k]) for k in range (len (unames))])
             try:
                 toappend.append(self.data[mykey])
                 toappend.append(self.unbiased[mykey])
             except:
                 toappend.append(0.)
                 toappend.append(0.)
-            
+
             flat.append(toappend)
-        
+
         return flat
-    
+
     def reset (self):
         # we do not reset the unbiased data here
         # and we do not want to erase the keys (just the values)
         for key in self.data:
             self.data[key] = 0.
         self.dsum = 0
-    
+
     def deep_reset (self):
         # we do reset the unbiased data here
         self.data = {}
         self.unbiased = {}
         self.dsum = 0
         self.usum = 0
-    
+
     def update (self, mydict, we=1.):
         if not isinstance (mydict, dict):
             raise ValueError
@@ -681,33 +681,33 @@ class Histo:
         self.unbiased[hkey] += 1./we
         self.dsum += 1.
         self.usum += 1./we
-    
+
     def print_n (self, outfile=sys.stdout, mode='w'):
         if type (outfile) not in [str, file]:
-            print >> sys.stderr, "Cowardly refusing to print histogram to random stuff. Soprassiedo..."
+            print("Cowardly refusing to print histogram to random stuff. Soprassiedo...", file=sys.stderr)
         if isinstance (outfile, str):
             out = open (outfile, mode)
         else:
             out = outfile
-        
+
         flat = self.flatten ()
-        
+
         # we weant to normalise the histogram
         for row in flat:
             for e in row[0:-2]:
-                print >> out, e,
-            print >> out, long(row[-2]), row[-2] / self.dsum, row[-1] / self.usum
-        
+                print(out, e,)
+            print(out, long(row[-2]), row[-2] / self.dsum, row[-1] / self.usum)
+
         return
-    
+
     def project (self, keylist):
         # here we project the histogram integrating along
         # all dimensions that are not listed in the keylist
         if type (keylist) not in [str, list]:
             raise ValueError
-        
+
         keylist = list (keylist)
-        
+
         unames = []
         for key in self.data.keys():
             for subkey in key:
@@ -724,12 +724,12 @@ class Histo:
             for subkey in key:
                 if subkey[1] < mins[unames.index(subkey[0])]:
                     mins[unames.index(subkey[0])] = subkey[1]
-        
+
         prdata = {}
         for key, val in self.data.items ():
             prkey = tuple([(key[i][0], key[i][1]) for i in tokeep])
             prdata[prkey] += val
-        
+
         return prdata
 
     def __getitem__ (self, key):
@@ -780,12 +780,12 @@ def buildHisto (inputfile, conffile, topologyfile, ops, skip=1):
             if myinput.wait() != 0:
                 raise IOError ('Critical Error')
             s.read_all_interactions (myinput.stdout.readlines ())
-            
+
             state = ops.get_all_states (s)
             ret.update (state, 1.)
 
             #print >> sys.stderr, '#', nconf, 'done'
-        
+
         nconf += 1
         # get next system
         s = l.get_system ()
@@ -795,8 +795,8 @@ def buildHisto (inputfile, conffile, topologyfile, ops, skip=1):
 
 
 ####################################################
-# here we adapt our weights; given one histogram, 
-# we compute the new weights and implement them as 
+# here we adapt our weights; given one histogram,
+# we compute the new weights and implement them as
 # a dictionary
 ####################################################
 def adaptive_weights (histo, oldweights=None, carried=[]):
@@ -815,7 +815,7 @@ def adaptive_weights (histo, oldweights=None, carried=[]):
                 c.get_value_from_key
             except AttributeError:
                 raise TypeError ('Third argument to adaptive_weights must be a list of Weights instances')
-    
+
     unames = []
     newdict = {}
     for key, val in histo.unbiased.items():
@@ -835,7 +835,7 @@ def adaptive_weights (histo, oldweights=None, carried=[]):
                 newdict[key] = 2. * owe
             if newdict[key] < 0.5 * owe:
                 newdict[key] = 0.5 * owe
-        
+
     unames.sort () # we always sort the names
 
     # we check that if the carried weight have something to say about a given
@@ -848,8 +848,7 @@ def adaptive_weights (histo, oldweights=None, carried=[]):
                 mystate[subkey[0]] = subkey[1]
             owe = c.get_value_from_key(None, mystate)
             newdict[key] *= owe
-    
+
     w1 = define_weight('W1', unames, newdict)
 
     return Weights (w1, [c.weights for c in carried])
-

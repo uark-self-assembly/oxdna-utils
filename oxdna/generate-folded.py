@@ -64,7 +64,7 @@ class Strand:
         :param double: a `boolean`, whether or not this is a double strand
         :param line: a `str` to parse into a `sequence` and `double`. If supplied, `sequence` and `double` are ignored
         """
-        if line:
+        if not line == None:
             split = line.split()
             if split[0].upper() == 'DOUBLE':
                 self.double: bool = True
@@ -313,6 +313,10 @@ def parse_strands(file_path: str) -> List[Strand]:
     lines = sequence_file.readlines()
     strands: List[Strand] = [Strand(line=line) for line in lines if len(line) > 0]
     strands.sort(key=lambda strand: len(strand.sequence), reverse=True)
+
+    for strand in strands:
+        print (strand.sequence)
+
     return strands
 
 
@@ -368,7 +372,7 @@ def generate_topology(system: System, output_file_path):
     topology_file.close()
 
 
-def generate_dat(system: System):
+def generate_dat(system: System, output_file_path):
     # generate the strands
     lines_count = len(system.strands)
     i = 1
@@ -426,9 +430,9 @@ def generate_dat(system: System):
 
     # here we write the configuration file (coordinates)
     try:
-        dat_file = open('generated.dat', 'w')
+        dat_file = open(output_file_path, 'w')
     except:
-        print('Could not open generated.dat for writing. Aborting', file=sys.stderr, flush=True)
+        print('Could not open ', output_file_path, ' for writing. Aborting', file=sys.stderr, flush=True)
         sys.exit(5)
 
     print('t = 0', file=dat_file)
@@ -498,7 +502,7 @@ if __name__ == '__main__':
     parsed_strands = parse_strands(input_file_path)
     oxdna_system = System(strands=parsed_strands, box=numpy.array([box_size, box_size, box_size]))
     generate_topology(oxdna_system, output_file_path=output_file_name + '.top')
-    generate_dat(oxdna_system)
+    generate_dat(oxdna_system, output_file_path=output_file_name + '.dat')
 
     print('## ALL DONE. Generated {} and {}'.format(output_file_name + '.top', output_file_name + '.dat'),
           file=sys.stderr, flush=True)

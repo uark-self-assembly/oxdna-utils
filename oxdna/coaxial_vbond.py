@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 try:
@@ -86,7 +86,7 @@ def main():
         if E < 2.: E += strand_dstrand_energy(s._strands[3], s._strands[0], s._strands[1], box)
         
         if E < 0.:
-            print E
+            print(E)
             f = open(output, "a")
             f.write("%d %e\n" % (counter, E))
             f.close()

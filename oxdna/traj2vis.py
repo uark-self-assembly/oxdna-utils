@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys, os
 try:
@@ -13,11 +13,11 @@ try:
     conffile = sys.argv[2]
     topfile = sys.argv[3]
 except:
-    print >> sys.stderr, "Usage: %s <%s> <%s> <%s>" % (sys.argv[0], "pdb|xyz", "trajectory", "topology")
+    print("Usage: %s <%s> <%s> <%s>" % (sys.argv[0], "pdb|xyz", "trajectory", "topology"), file=sys.stderr)
     sys.exit(1)
 
 if which not in ['pdb','xyz']:
-    print >> sys.stderr, "choose either pdb or xyz in the second argument. Aborting"
+    print("choose either pdb or xyz in the second argument. Aborting", file=sys.stderr)
     sys.exit (3)
 
 pdb, xyz = False, False
@@ -34,14 +34,14 @@ try:
     inp = open (conffile, 'r')
     inp.close()
 except:
-    print >> sys.stderr, "Could not open file '%s' for reading. Aborting" % conffile
+    print("Could not open file '%s' for reading. Aborting" % conffile, file=sys.stderr)
     sys.exit(2)
 
 try:
     inp = open (topfile, 'r')
     inp.close()
 except:
-    print >> sys.stderr, "Could not open file '%s' for reading. Aborting" % topfile
+    print("Could not open file '%s' for reading. Aborting" % topfile, file=sys.stderr)
     sys.exit(2)
 
 # return parts of a string 
@@ -68,7 +68,7 @@ def import_model_constants():
             # this could be a source of bugs
             val = val.replace("f", "")
             # this awful exec is needed in order to get the right results out of macro definitions
-            exec "tmp = %s" % (val)
+            exec(f"global tmp\ntmp = {val}")
             globals()[key] = tmp
     f.close()
 
@@ -124,12 +124,12 @@ inp.close()
 
 nnucl, nstrands = [int(x) for x in lines[0].split()]
 
-print >> sys.stderr, "## Topology: found %i strands, %i nucl" % (nstrands, nnucl)
+print("## Topology: found %i strands, %i nucl" % (nstrands, nnucl), file=sys.stderr)
 
-strandid = [None for x in xrange(nnucl)]
-basetype = [None for x in xrange(nnucl)]
-nn3 = [None for x in xrange(nnucl)]
-nn5 = [None for x in xrange(nnucl)]
+strandid = [None for x in range(nnucl)]
+basetype = [None for x in range(nnucl)]
+nn3 = [None for x in range(nnucl)]
+nn5 = [None for x in range(nnucl)]
 
 i = 0
 for line in lines[1:]:
@@ -157,21 +157,21 @@ box = []
 strtypes = ["ALA","GLY","CYS","ARG","PHE","LYS","SER","PRO","VAL","ASN","ASP"]
 
 while True:
-    rcs = [None for x in xrange(nnucl)]
-    a1s = [None for x in xrange(nnucl)]
-    a2s = [None for x in xrange(nnucl)]
-    a3s = [None for x in xrange(nnucl)]
+    rcs = [None for x in range(nnucl)]
+    a1s = [None for x in range(nnucl)]
+    a2s = [None for x in range(nnucl)]
+    a3s = [None for x in range(nnucl)]
     
     try:
         times.append (int(inp.readline().split()[2]))
         box = np.array([float(x) for x in inp.readline().split()[2:]])
-        print "## conf %i, time = %i box =(%lf %lf %lf)" % (nconfs, times[nconfs], box[0], box[1], box[2])
+        print("## conf %i, time = %i box =(%lf %lf %lf)" % (nconfs, times[nconfs], box[0], box[1], box[2]))
     except:
-        print >> sys.stderr, "## End of trajectory...", nconfs
+        print("## End of trajectory...", nconfs, file=sys.stderr)
         break
     
     inp.readline () # to remove the energy line 
-    for i in xrange (nnucl):
+    for i in range (nnucl):
         line = inp.readline()
         words = line.split()
         rcs[i] = np.array([float(x) for x in words[0:3]])
@@ -180,36 +180,36 @@ while True:
         a2s[i] = np.cross (a3s[i], a1s[i])
 
     # strand-wise periodic boundary conditions
-    cdms = [np.array([0.,0.,0.]) for x in xrange(nstrands)]
-    nin = [0 for x in xrange (nstrands)]
-    for i in xrange (nnucl):
+    cdms = [np.array([0.,0.,0.]) for x in range(nstrands)]
+    nin = [0 for x in range (nstrands)]
+    for i in range (nnucl):
         cdms[strandid[i]] += rcs[i]
         nin[strandid[i]] += 1
 
     ocdm = np.array([0.,0.,0.])
-    for i in xrange (nstrands):
+    for i in range (nstrands):
         cdms[i] /= nin[i]
         ocdm += cdms[i] - box * np.rint (cdms[i] / box)
     ocdm /= float(nstrands)
 
     if xyz:
-        print >> out, 2 * nnucl
-        print >> out
-        for i in xrange(nnucl):
+        print(2 * nnucl, file=out)
+        print("", file=out)
+        for i in range(nnucl):
             sid = strandid[i]
             #rnow = rcs[i] - cdms[strandid[i]]  + POS_BACK * a1s[i]
             if os.environ.get(GROOVE_ENV_VAR) == '1':
                 rnow = rcs[i] - cdms[sid] + POS_MM_BACK1 * a1s[i] + POS_MM_BACK2 * a2s[i] + (cdms[sid] - ocdm) - box * np.rint ((cdms[sid] - ocdm) / box)
             else:
                 rnow = rcs[i] - cdms[sid] + POS_BACK * a1s[i] + (cdms[sid] - ocdm) - box * np.rint ((cdms[sid] - ocdm) / box)
-            print >> out, "C %lf %lf %lf" % (rnow[0], rnow[1], rnow[2])
+            print("C %lf %lf %lf" % (rnow[0], rnow[1], rnow[2]), file=out)
             rnow = rcs[i] - cdms[sid] + POS_BASE * a1s[i] + (cdms[sid] - ocdm) - box * np.rint ((cdms[sid] - ocdm) / box)
             #rnow = rcs[i] - cdms[strandid[i]] + POS_BASE * a1s[i]
-            print >> out, "O %lf %lf %lf" % (rnow[0], rnow[1], rnow[2])
+            print("O %lf %lf %lf" % (rnow[0], rnow[1], rnow[2]), file=out)
     elif pdb:
         # header
         res = "HEADER    frame t= " + str(times[nconfs])+ " \nMODEL        0 \nREMARK ## 0,0\n" 
-        for i in xrange (nnucl):
+        for i in range (nnucl):
             sid = strandid[i]
             stringid = strtypes[((sid + 1) % len(strtypes))]
 
@@ -253,7 +253,7 @@ while True:
             elif base == 3:
                 atomtype = 'P'
             else:
-                print >> sys.stderr, "Should not happen..."
+                print("Should not happen...", file=sys.stderr)
                 atomtype = 'H'
 
             # print the base site
@@ -282,14 +282,14 @@ if pdb:
     # sicuri che siano giusti
     commands.append ("~bond #0")
     # make the bonds within each nucleotide
-    for i in xrange (nnucl):
+    for i in range (nnucl):
         if os.environ.get(GROOVE_ENV_VAR) == '1':
             commands.append ("bond #0:%i.A:%i.B" % (i, i))
             commands.append ("bond #0:%i.B:%i.C" % (i, i))
         else:
             commands.append ("bond #0:%i" % (i))
     # make the bonds between nucleotide backbones
-    for i in xrange (nnucl):
+    for i in range (nnucl):
         if nn5[i] >= 0:
             commands.append ("bond #0:%i.A,%i.A" % (i, i + 1))
     
@@ -313,6 +313,6 @@ if pdb:
     f = open ("chimera.com", "w")
     for c in commands:
         #print c
-        print >> f, c
+        print(c, file=f)
     f.close ()
 

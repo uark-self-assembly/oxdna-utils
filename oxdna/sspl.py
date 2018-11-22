@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -20,9 +20,9 @@ s = l.get_system()
 try:
     i1 = 0
     i2 = len(s._strands[0]._nucleotides) - 1
-    print >> sys.stderr, "Nucleotides", i1, i2
+    print("Nucleotides", i1, i2, file=sys.stderr)
 except:
-    print >> sys.stderr, "Supply nucleotides... Aborting"
+    print("Supply nucleotides... Aborting", file=sys.stderr)
     sys.exit (-1)
 
 L2 = 0.
@@ -53,6 +53,6 @@ l0 /= float (niter)
 Pl = Ll0 / l0
 Kl = L2 / Lmax
 
-print Pl, Kl, l0, L2, Ll0, "Pl, Kl, <l0>, <L2>, <L * l0>"
+print(Pl, Kl, l0, L2, Ll0, "Pl, Kl, <l0>, <L2>, <L * l0>")
 
 

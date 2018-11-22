@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 #A utility that prints out the number of hydrogen bonds between different strands in the system 
 # specify the secondary structure of which strands you want to display. If you set both strands equal, it shows the bonds of the strand with itself
@@ -33,7 +33,7 @@ def conf2dot(system,sid1,sid2):
 	for nucleotide_id in range(len(system._strands[sid1]._nucleotides)):
 		nucleotide = system._strands[sid1]._nucleotides[nucleotide_id]
 		if(len(nucleotide.interactions) > 1):
-			print >> sys.stderr, 'One nucleotide has more than 1 h-bonding interaction, skipping...'
+			print('One nucleotide has more than 1 h-bonding interaction, skipping...', file=sys.stderr)
 			return ''
 		elif len(nucleotide.interactions) == 1:
 			second_id =  system._nucleotides[nucleotide.interactions[0]].index 
@@ -52,7 +52,7 @@ def conf2dot(system,sid1,sid2):
 		for nucleotide_id in range(len(system._strands[sid2]._nucleotides)):
 			nucleotide = system._strands[sid1]._nucleotides[nucleotide_id]
 			if(len(nucleotide.interactions) > 1):
-				print >> sys.stderr, 'One nucleotide has more than 1 h-bonding interaction, skipping...'
+				print('One nucleotide has more than 1 h-bonding interaction, skipping...', file=sys.stderr)
 				return ''
 			elif len(nucleotide.interactions) == 1:
 				second_id =  system._nucleotides[nucleotide.interactions[0]].index 
@@ -66,7 +66,7 @@ def conf2dot(system,sid1,sid2):
 					
 
 if (len(sys.argv) < 5):
-  print 'Usage %s input_file trajectory_file strand_id1 strand_id2' % sys.argv[0]
+  print('Usage %s input_file trajectory_file strand_id1 strand_id2' % sys.argv[0])
   sys.exit()
 
 
@@ -95,7 +95,7 @@ myreader = readers.LorenzoReader(conffile,topologyfile)
 mysystem = myreader.get_system()
 
 if not os.path.isfile(PROCESSPROGRAM):
-	print "Cannot execute output_bonds program. Please make sure to compile DNAnalysis in ../bin/ directory"
+	print("Cannot execute output_bonds program. Please make sure to compile DNAnalysis in ../bin/ directory")
 	sys.exit(1)
 
 counter = 0
@@ -124,11 +124,11 @@ while mysystem != False:
 
 	for line in stderr.split('\n'):
       	  if "CRITICAL" in line:
-              	  print line
-	print '# configuration number: ',counter
+              	  print(line)
+	print('# configuration number: ',counter)
 	#mysystem.show_H_interactions()
 	notation = conf2dot(mysystem,sid1,sid2)
-	print notation
+	print(notation)
 	counter += 1
 	mysystem = myreader.get_system()
 

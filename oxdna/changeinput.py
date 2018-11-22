@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import getopt
 import sys
@@ -20,11 +20,11 @@ shortArgs=[]
 try:
     args, files = getopt.getopt(sys.argv[1:], shortArgs, longArgs)
 except:
-    print >> sys.stderr, "Wrong usage. Aborting"
+    print("Wrong usage. Aborting", file=sys.stderr)
     sys.exit (-2)
 
 if len(args) < 1:
-    print >> sys.stderr, "No point in changing nothing..."
+    print("No point in changing nothing...", file=sys.stderr)
     sys.exit (-1)
 
 '''
@@ -38,7 +38,7 @@ for f in files:
 '''
 
 tochange = [[e[2:], v] for e, v in args]
-print "## (changeinput) tochange: ", tochange
+print("## (changeinput) tochange: ", tochange)
 for file in files:
     inp = open (file, 'r')
     #tmpfile = './.' + file + '_new'
@@ -46,7 +46,7 @@ for file in files:
     out = open (tmpfile, 'w')
     changed = []
 
-    print >> sys.stderr, "## (changeinput) modifying `%s\'" % file
+    print("## (changeinput) modifying `%s\'" % file, file=sys.stderr)
     inlines = inp.readlines ()
     for inline in inlines:
         written = False

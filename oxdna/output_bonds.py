@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 #A utility that prints out the number of hydrogen bonds between different strands in the system 
 
@@ -17,7 +17,7 @@ command_for_data =  'analysis_data_output_1 = { \n name = stdout \n print_every 
 PROCESSPROGRAM = os.path.join(os.path.dirname(__file__), "../build/bin/DNAnalysis")
 
 if (len(sys.argv) < 3):
-  print 'Usage %s input_file trajectory_file [confid]' % sys.argv[0]
+  print('Usage %s input_file trajectory_file [confid]' % sys.argv[0])
   sys.exit()
 
 
@@ -40,7 +40,7 @@ myreader = readers.LorenzoReader(conffile,topologyfile)
 mysystem = myreader.get_system()
 
 if not os.path.isfile(PROCESSPROGRAM):
-	print "Cannot execute output_bonds program. Please make sure to compile DNAnalysis in ../bin/ directory"
+	print("Cannot execute output_bonds program. Please make sure to compile DNAnalysis in ../bin/ directory")
 	sys.exit(1)
 
 counter = 0
@@ -65,8 +65,8 @@ while mysystem != False:
 	if counter == confid:
 		myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		mystdout,mystderr = myinput.communicate()
-		print >> sys.stderr, mystderr
-		print >> sys.stdout, mystdout
+		print(mystderr, file=sys.stderr)
+		print(mystdout, file=sys.stdout)
 		sys.exit(1)
 	counter += 1
 	mysystem = myreader.get_system()

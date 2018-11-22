@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 try:
@@ -6,23 +6,21 @@ try:
 except:
     import mynumpy as np
 import base, readers
-import subprocess as sp
 
-#!/usr/bin/env python
 
 def print_usage():
-    print "USAGE:"
-    print "\t%s trajectory topology skip" % sys.argv[0]
+    print("USAGE:")
+    print("\t%s trajectory topology skip" % sys.argv[0])
     sys.exit(1)
 
 try:
     traj = sys.argv[1]
-    print traj
+    print(traj)
     topo = sys.argv[2]
-    print topo
+    print(topo)
     skip = int(sys.argv[3])
-    print skip
-except: 
+    print(skip)
+except:
     print_usage()
 
 l = readers.LorenzoReader(traj, topo)
@@ -44,4 +42,3 @@ while s:
     niter += 1
 
 out.close()
-

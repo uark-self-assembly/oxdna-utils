@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -48,7 +48,7 @@ while s:
             raise KeyError
         dr -= s._box * np.rint (dr / s._box)
 
-    print s._time, np.sqrt(np.dot(dr, dr)), dr[0], dr[1], dr[2]
+    print(s._time, np.sqrt(np.dot(dr, dr)), dr[0], dr[1], dr[2])
     s = l.get_system()
     niter += 1
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 #A utility that prints out the number of hydrogen bonds between different strands in the system 
 
@@ -38,7 +38,7 @@ def nhbst (lines):
 PROCESSPROGRAM = os.path.join(os.path.dirname(__file__), "output_bonds.py")
 
 if (len(sys.argv) < 3):
-  print 'Usage %s input_file trajectory_file ' % sys.argv[0]
+  print('Usage %s input_file trajectory_file ' % sys.argv[0])
   sys.exit()
   
 #now get topology file name:
@@ -54,7 +54,7 @@ myreader = readers.LorenzoReader(conffile,topologyfile)
 mysystem = myreader.get_system()
 
 if not os.path.isfile(PROCESSPROGRAM):
-	print "Cannot execute output_bonds program. Please make sure to go to process_data/ directory and type make"
+	print("Cannot execute output_bonds program. Please make sure to go to process_data/ directory and type make")
 	sys.exit(1)
 
 counter = 0
@@ -66,8 +66,8 @@ while mysystem != False:
     a, b = nhbst (myinput.stdout.readlines())
     for line in myinput.stderr.readlines():
         if "CRITICAL" in line:
-            print line
-    print mysystem._time, a, b
+            print(line)
+    print(mysystem._time, a, b)
     counter += 1
     mysystem = myreader.get_system()
 

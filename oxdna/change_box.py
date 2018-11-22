@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 import math
@@ -16,9 +16,9 @@ def change_box(new_box, inp, out):
     inp_file.readline()
     old_box = float(inp_file.readline().split()[2])
     ratio = new_box / old_box
-    print >> out_file, "t = 0"
-    print >> out_file, "b = %f %f %f" % (new_box, new_box, new_box)
-    print >> out_file, inp_file.readline()[:-1]
+    print("t = 0", file = out_file)
+    print("b = %f %f %f" % (new_box, new_box, new_box), file=outfile)
+    print(inp_file.readline()[:-1], file=outfile)
     i = 0
     for line in inp_file.readlines():
         coords = [ratio*float(x) for x in line.split()]
@@ -30,13 +30,13 @@ def change_box(new_box, inp, out):
 def print_new_input(options, inp, out):
     inp_file = open(inp)
     out_file = open(out, "w")
-    
+
     for line in inp_file.readlines():
         sp_line = [x.strip() for x in line.split("=")]
         if len(sp_line) == 1 or sp_line[0] not in options.keys(): out_file.write(line)
 
     out_file.write("# AUTOMATICALLY CHANGED/ADDED BY CHANGE_BOX.PY\n")
-    for k, v in options.iteritems():
+    for k, v in options.items():
         out_file.write(str(k) + " = " + str(v) + "\n")
 
     out_file.close()
@@ -85,9 +85,9 @@ print_new_input(options, inp, "input_new_box")
 shutil.copy(conf, "init_new_box.dat")
 shutil.copy(conf, "last_new_box.dat")
 
-args = ["/home/lorenzo/programmi/oxDNA_new/build/bin/oxDNA", "input_new_box"]
-args = ["/users/randisif/tep/CURRENToxdna-code/oxDNA/build/bin/oxDNA", "input_new_box"]
+args = ["bin/oxDNA", "input_new_box"]
 #~/tep/CURRENToxdna-code/oxDNA/build/bin/oxDNA
+subprocess.call(['dir'], stdout=subprocess.PIPE)
 p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 output = p.stdout.readline()
 initial_E = float(output.split()[1])
@@ -99,7 +99,7 @@ print_new_input(options, inp, "input_new_box")
 
 for i in range(steps):
     new_box += delta
-    print "Trying box of size %f" % new_box
+    print("Trying box of size %f" % new_box)
 
     change_box(new_box, "last_new_box.dat", "init_new_box.dat")
     done = False
@@ -111,7 +111,7 @@ for i in range(steps):
         p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = p.stdout.readlines()[-1]
         last_E = float(output.split()[1])
-        print "New vs old: %f %f" % (last_E, initial_E)
+        print("New vs old: %f %f" % (last_E, initial_E))
         if last_E < initial_E or math.fabs((last_E - initial_E) / initial_E) < delta_E or tries > MAX_TRIES: done = True
         else: shutil.copy("last_new_box.dat", "init_new_box.dat")
 

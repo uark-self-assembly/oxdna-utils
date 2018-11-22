@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -32,11 +32,11 @@ append = False
 niter = 1
 while s:
     base.Logger.log("Working on conf %i..." % niter, base.Logger.INFO)
-	
+
     # bring in box
     for strand in s._strands:
-		diff = np.rint (strand.cm_pos / s._box ) * s._box
-		s.translate (-diff)
+        diff = np.rint (strand.cm_pos / s._box ) * s._box
+        s.translate (-diff)
     
     # center of mass to 0
     if cdm20:

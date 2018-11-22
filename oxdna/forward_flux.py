@@ -1,6 +1,4 @@
 
-
-
 import os
 import random
 import glob
@@ -26,8 +24,8 @@ class ForwardFlux:
 		steps = 0;
 		dt = 0;
 		for line in self.init_template:
-  			if "topology" in line[0:len("topology")+2]:
-    				self.topologyfile = line.split('=')[1].replace(' ','').replace('\n','')
+			if "topology" in line[0:len("topology")+2]:
+				self.topologyfile = line.split('=')[1].replace(' ','').replace('\n','')
 			if "dt" in line[0:len("dt")+2]:
 				dt = line.split('=')[1].replace(' ','').replace('\n','')
 			if "steps" in line[0:len("steps")+2]:
@@ -39,9 +37,9 @@ class ForwardFlux:
 		self.seed = seed
 		self.prefix = prefix 
 
- 		self.timeunit = float(dt) * float(steps)
+		self.timeunit = float(dt) * float(steps)
 		self.runningtime = 0
-		print " Time between different order paramater checks is ",self.timeunit
+		print(" Time between different order paramater checks is ",self.timeunit)
  	
 
 	def run_simulation(self,inputfile,last_conf,dbg=0):
@@ -70,7 +68,7 @@ class ForwardFlux:
 			#self.order_pars.calculate_order_parameters()
 			
 			if(dbg != 0):
-				print 'State ',dbg, ' is ',self.order_pars.get_state(dbg,system)
+				print('State ',dbg, ' is ',self.order_pars.get_state(dbg,system))
 			#print self.stop, ' is ', self.order_pars.get_order_parameter(self.stop)
 			#print self.Astate, ' is' , self.order_pars.get_order_parameter(self.Astate)
 			#print self.init, ' is ', self.order_pars.get_order_parameter(self.init)
@@ -108,7 +106,7 @@ class ForwardFlux:
 
 				 
 				initfile = random.choice(possible_inits)
-				print 'Starting simulation from ',initfile
+				print('Starting simulation from ',initfile)
 				shutil.copy(initfile,self.last_conf_name)
 				
 				self.gen_init_file(self.seed,init_filename,self.last_conf_name,self.last_conf_name+'.trajectory')
@@ -120,21 +118,21 @@ class ForwardFlux:
 					confname = self.prefix + '_lastconf_at_'+self.stop+'_'+str(self.seed)+'.'+str(self.iterations)+'.dat'
 					k = 1
 					while os.path.exists(confname):
-						print 'Error, filename ' +confname+ ' exists, trying different one',
+						print('Error, filename ' +confname+ ' exists, trying different one',)
 						confname = self.prefix + '_lastconf_at_'+self.stop+'_'+str(self.seed)+'.'+str(self.iterations)+'_sub'+str(k)+'.dat'
 						k += 1
 							
 					shutil.copy(self.last_conf_name,confname)
 					self.completed += 1
-					print 'Sucess, reached order parameter ',self.stop ,' and configuration saved to ',confname	
+					print('Sucess, reached order parameter ',self.stop ,' and configuration saved to ',confname)
 				else:
-					print 'Fell back to order parameter ',self.Astate
+					print('Fell back to order parameter ',self.Astate)
 										
 				self.seed += 1
 				self.iterations +=1
 				logout.write(self.init + ' ' + self.stop + ' '+ ' ' + str(result) + ' ' + str(self.runningtime) +'\n')	
 				logout.flush()			
- 			print 'Finished simulations, completed / runs = ', float(self.completed)/self.iterations
+			print('Finished simulations, completed / runs = ', float(self.completed)/self.iterations)
 
 	def run_flux(self, order_parameter_to_reach, order_parameter_to_check_recross,start_configuration_filename ,number_of_crossings,dbg=0):
 			input_filename = self.prefix + '_input_' + 'it_' + str('flux') + 'seed_'  + str(self.seed) 
@@ -154,12 +152,12 @@ class ForwardFlux:
 				res = 0				
 				while(res == 0):
 					res = self.run_simulation(input_filename,self.last_conf_name,dbg)
-				print 'Crossed ',order_parameter_to_reach
+				print('Crossed ',order_parameter_to_reach)
 				logout.write(str(crossings)+':  crossed through '+ str(order_parameter_to_reach) + ' at '+str(self.runningtime) + '\n')
 				logout.flush()
 				crossings += 1
 				confname = self.prefix + '_lastconf_at_'+self.stop+'_'+str(self.seed)+'.t'+str(self.runningtime)+'_N'+str(crossings)+'.dat'
-				print 'Generated ',confname
+				print('Generated ',confname)
 				shutil.copy(self.last_conf_name,confname)
 				if crossings >= number_of_crossings:
 					return
@@ -170,7 +168,7 @@ class ForwardFlux:
 				
 				
 				if(res == 1):
-					print ' Recrossed to ',order_parameter_to_check_recross
+					print(' Recrossed to ',order_parameter_to_check_recross)
 			logout.close()
 
 	def gen_init_file(self,seed,init_filename,last_conf_name,trajectory_name):

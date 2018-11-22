@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import math
 import sys, os, re
 import argparse
@@ -23,19 +23,19 @@ salt_conc		molarity(mol L^-1)
 box					see get_TM
 '''
 complementary_base = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
-complementary_base.update({k.lower():v.lower() for k,v in complementary_base.iteritems()})
+complementary_base.update({k.lower():v.lower() for k,v in complementary_base.items()})
 
 def pretty_print_duplex(seq, comp_seq, seq_is_53 = True):
 	'''
 	Returns a string containing a pretty-print a DNA duplex.
-	
+
 	seq: strand 1 sequence
 	comp_seq: strand 2 sequence, in parallel order to strand 1, so that seq[0] is complementary to comp_seq[0], and so on.
 	seq_is_53: if True, the order of the strand 1 is assumed to be 5'-3'. Otherwise it's 3'-5'. Defaults to True.
 	'''
 	mismatch_string = ''
 	for i in range(len(seq)):
-		if seq[i] != complementary_base[comp_seq[i]]: 
+		if seq[i] != complementary_base[comp_seq[i]]:
 			mismatch_string += "-"
 		else:
 			mismatch_string += " "
@@ -57,19 +57,19 @@ def pretty_print_duplex(seq, comp_seq, seq_is_53 = True):
 def complementary(seq, keep_direction = False):
 	'''
 	Returns a sequence complementary to the given sequence seq, and keeps the orientation if keep_direction is True (defaults to False).
-	
+
 	This means that if keep_direction is True, the complementary of AC will be GT.
 	If keep_direction is false, the complementary of AC will be TG.
-	
-	
+
+
 	'''
 	comp = [complementary_base[i] for i in seq]
 	if keep_direction: comp = comp[::-1]
 	if type(seq) is str:
 		comp = ''.join(comp)
 	return comp
-	
-		
+
+
 
 def is_self_complementary(seq):
 	'''
@@ -108,7 +108,7 @@ def get_duplex_concentration_from_box(box_size, box_unit = oxDNA_box_unit):
 	alt_duplex_concentration = 2.6868994 / (box_size*box_size*box_size) ;
 	return duplex_concentration
 
-	
+
 def get_TM(seq,boxsize=16.4,salt_conc=0.5,seq_comp = [],duplex_concentration = None, phosphate_correction = 0.):
 	'''
 	Computes melting temperature, DeltaH and DeltaS of a DNA duplex.
@@ -124,7 +124,7 @@ def get_TM(seq,boxsize=16.4,salt_conc=0.5,seq_comp = [],duplex_concentration = N
 												a duplex with no phosphates on either end has -1 phosphate pairs.
 												a duplex with phosphates on all ends has +1 phosphate pairs.
 	'''
-	
+
 	if duplex_concentration == None:
 		duplex_concentration = get_duplex_concentration_from_box(boxsize)
 
@@ -235,48 +235,48 @@ def get_TM(seq,boxsize=16.4,salt_conc=0.5,seq_comp = [],duplex_concentration = N
 	})
 	# add every complementary base-pair-step
 	deltaHS_compl = {}
-	for k,v in deltaHS.iteritems():
+	for k,v in deltaHS.items():
 		if not k[::-1] in deltaHS.keys():
 			deltaHS_compl[k[::-1]] = v
 		elif k[::-1] != k:
-			print 'ERROR: double addition of key',k
+			print('ERROR: double addition of key',k)
 	deltaHS.update(deltaHS_compl)
 
 	# check that the two sequences have the same length
 	if seq_comp == []:
 		seq_comp = complementary(seq)
 	if len(seq) != len(seq_comp):
-		print 'ERROR: function',__name__,'called with seq of length',len(seq),'and seq_comp of length',len(seq_comp),'but the two sequences should have the same length'
+		print('ERROR: function',__name__,'called with seq of length',len(seq),'and seq_comp of length',len(seq_comp),'but the two sequences should have the same length')
 		sys.exit(-1)
 	# check that there are no terminal mismatches, as the parameters here are only for internal mismatches
 	exit = False
 	if seq_comp[0]  != complementary(seq[0]):
-		print 'ERROR: sequences in get_TM have terminal mismatches, which are not implemented in the program.'
-		print "       strand 1 has",seq[0],"on the 5' end, but strand 2 has",seq_comp[0],"on the 3' end."
+		print('ERROR: sequences in get_TM have terminal mismatches, which are not implemented in the program.')
+		print("       strand 1 has",seq[0],"on the 5' end, but strand 2 has",seq_comp[0],"on the 3' end.")
 		exit = True
 	if seq_comp[-1] != complementary(seq[-1]):
-		print 'ERROR: sequences in get_TM have terminal mismatches, which are not implemented in the program.'
-		print "       strand 1 has",seq[-1],"on the 3' end, but strand 2 has",seq_comp[-1],"on the 5' end."
+		print('ERROR: sequences in get_TM have terminal mismatches, which are not implemented in the program.')
+		print("       strand 1 has",seq[-1],"on the 3' end, but strand 2 has",seq_comp[-1],"on the 5' end.")
 		exit = True
 	# check that there are no 2 consecutive mismatches
 	for i in range(len(seq)):
 		if seq[i] != complementary(seq_comp[i]) and seq[i+1] != complementary(seq_comp[i+1]):
-			print "ERROR: the duplex contains two or more consecutive mismatches. Parameters for that (if they exist) are not implemented."
+			print("ERROR: the duplex contains two or more consecutive mismatches. Parameters for that (if they exist) are not implemented.")
 			exit = True
 			break
 	if exit: sys.exit(-1)
-	
+
 	for i in range (length-1) :
 		my_id = seq[i:i+2] + '/'+ seq_comp[i:i+2]
-		
+
 		deltaH += deltaHS[my_id][0]
 		deltaS += deltaHS[my_id][1]
-		
+
 	# add penalty for an AT sequence end
 	n_terminal_AT = (seq[0] in ['A','T']) + (seq[-1] in ['A','T'])
 	deltaH += 2.2 * n_terminal_AT
 	deltaS += 6.9 * n_terminal_AT
-	 
+
 
 	deltaH += 0.2;
 	deltaS += -5.6;
@@ -291,15 +291,15 @@ def get_TM(seq,boxsize=16.4,salt_conc=0.5,seq_comp = [],duplex_concentration = N
 	# salt entropy correction
 	salt_correction = 0.368 * (len(seq) + phosphate_correction) * math.log(salt_conc)
 	deltaS += salt_correction
- 
-	GAS_CONSTANT = 1.9858775 
+
+	GAS_CONSTANT = 1.9858775
 
 
 	Tm = deltaH / (deltaS + GAS_CONSTANT * math.log(duplex_concentration/divisor));
 	return Tm - 273.15, deltaH, deltaS
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description="Compute the SantaLucia melting temperature of a DNA "+ 
+	parser = argparse.ArgumentParser(description="Compute the SantaLucia melting temperature of a DNA "+
 	"duplex of a given sequence. The sequence can be given either as read from the 5' end to the 3' end, "+
 	"as is convention in the research community, or in the 3' to 5' order, as in the oxDNA program.")
 	# argumets for strand 1 sequence
@@ -325,14 +325,14 @@ if __name__ == '__main__':
 		parser.print_help()
 		parser.exit()
 
- 	 
+
 	# handle arguments
 	args = parser.parse_args()
 	salt = args.salt
 	box = args.box
 	duplex_concentration = args.duplex_conc
 	phosphate_correction = args.extra_phosphate
-	
+
 	# primary sequence is always treated in the 5'-3' order internally
 	# and the secondary sequence is always treated in the 3'-5' order internally
 	if args.seq_53 != None:
@@ -351,16 +351,15 @@ if __name__ == '__main__':
 	T_M, DeltaH, DeltaS = get_TM(seq, box, salt, comp_seq, duplex_concentration, phosphate_correction)
 	if not print_only_TM:
 		# pretty print the duplex sequence, to avoid mistakes
-		print pretty_print_duplex(seq, comp_seq, seq_is_53 = args.seq_53 != None )
+		print(pretty_print_duplex(seq, comp_seq, seq_is_53 = args.seq_53 != None ))
 		# print the box size if duplex_conc is given, or duplex_conc if box is given
 		if box == None:
-			print 'box size = ',get_box_from_duplex_concentration(duplex_concentration),'oxDNA unit lengths'
+			print('box size = ',get_box_from_duplex_concentration(duplex_concentration),'oxDNA unit lengths')
 		else:
-			print 'duplex concentration = ',get_duplex_concentration_from_box(box),'M'
+			print('duplex concentration = ',get_duplex_concentration_from_box(box),'M')
 
-		print 'DeltaH\t'+str(DeltaH)+'\tcal mol^-1'
-		print 'DeltaS\t'+str(DeltaS)+'\tcal mol^-1 K^-1'
-		print 'T_M\t'+str(T_M)+'\tC'
+		print('DeltaH\t'+str(DeltaH)+'\tcal mol^-1')
+		print('DeltaS\t'+str(DeltaS)+'\tcal mol^-1 K^-1')
+		print('T_M\t'+str(T_M)+'\tC')
 	else:
-		print "%.1f"%(T_M)
-
+		print("%.1f"%(T_M))

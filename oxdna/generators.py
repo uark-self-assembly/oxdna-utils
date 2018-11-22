@@ -81,14 +81,15 @@ class StrandGenerator (object):
             sequence = np.array(sequence)
 
         # Loads of input checking...
-        if isinstance(sequence, str):
+        elif isinstance(sequence, str):
             try:
                 sequence = [base.base_to_number[x] for x in sequence]
             except KeyError:
                 base.Logger.die("Key Error: sequence is invalid" % n)
-        if sequence == None:
+        elif sequence == None:
             sequence = np.random.randint(0, 4, bp)
-        elif len(sequence) != bp:
+
+        if len(sequence) != bp:
             n = bp - len(sequence)
             sequence = np.append(sequence, np.random.randint(0, 4, n))
             base.Logger.log("sequence is too short, adding %d random bases" % n, base.Logger.WARNING)
@@ -174,7 +175,7 @@ class StrandGenerator (object):
                 ns1.add_nucleotide(base.Nucleotide(rb - base.CM_CENTER_DS * a1, a1, a3, sequence[i]))
             ns1.make_circular(check_join_len=True)
         elif circular == True and not option_use_helicity:
-            for i in xrange(bp):
+            for i in range(bp):
                 rbx = math.cos (i * angle) * radius + 0.34 * math.cos(i * angle)
                 rby = math.sin (i * angle) * radius + 0.34 * math.sin(i * angle)
                 rbz = 0.
@@ -313,7 +314,7 @@ class StrandGenerator (object):
         s2.set_sequence (seqb)
 
         return s1, s2
-    
+
     def generate_rw (self, sequence, start_pos=np.array([0.,0.,0.])):
         """
         Generate ssDNA as a random walk (high-energy configurations are possible):
@@ -340,32 +341,32 @@ class StrandGenerator (object):
             pos = trypos
             rw.append (pos)
             #print >> sys.stderr, "# nucleotide", i + 1, "inserted"
-        
+
         # we get the a1 vectors in a smart way
         a1s = []
         d = rw[1] - rw[0]
         a1s.append (d / np.sqrt (np.dot(d, d)))
-        
+
         for i in range (1, len(rw) - 1):
             d = (rw[i + 1] + rw[i - 1]) * 0.5
             d = rw[i] - d
             a1s.append (d / np.sqrt(np.dot (d, d)))
-        
+
         d = rw[len(rw)-1] - rw[len(rw)-2]
         a1s.append (d / np.sqrt (np.dot(d, d)))
-        
+
         s = base.Strand()
         for i, r in enumerate(rw):
-            a1, a2, a3 = utils.get_orthonormalized_base (a1s[i], utils.get_random_vector(), utils.get_random_vector()) 
+            a1, a2, a3 = utils.get_orthonormalized_base (a1s[i], utils.get_random_vector(), utils.get_random_vector())
             #print np.dot(a1, a1), np.dot(a2, a2), np.dot(a3, a3), np.dot(a1, a2), np.dot(a1, a3), np.dot(a2, a3)
             ## POS_BACK is negative!
             cm = r + a1s[i] * abs(base.POS_BACK)
             s.add_nucleotide (base.Nucleotide (cm, a1, a3, sequence[i]))
-        
+
         return s
-        
+
         # we have to initialize the a3s
-       
+
 
 
 class TetramerGenerator (object):

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys, os
 try:
@@ -30,7 +30,7 @@ def read_strands(filename='caca.sqs', box_side=50):
     The main() function for this script
     Reads a text file with the following format:
     - Each line contains the sequence for a single strand (A,C,T,G)
-	      the nucleotides can be specified by (case insensitive) letter (A, C, G, T), 
+	      the nucleotides can be specified by (case insensitive) letter (A, C, G, T),
 			random (X), strong (S) and weak (W).
     - Options:
         - DOUBLE
@@ -55,9 +55,9 @@ def read_strands(filename='caca.sqs', box_side=50):
     DOUBLE CIRCULAR AGAGGTAGGAGGATTTGCTTGAGCTTCGAGAGCTTCGAGATTCGATCAGGGCT
     CIRCULAR CCTGTAAGGAGATCGGAGAGATTCGAGAGGATCTGAGAGCTTAGCT
     """
-    # we read the sequences from a file; each line is a strand; 
+    # we read the sequences from a file; each line is a strand;
     # prepending DOUBLE tells us to generate a double strand
-    # prepending CIRCULAR tells us to generate a (topologically) closed strand 
+    # prepending CIRCULAR tells us to generate a (topologically) closed strand
 
     # Check filename
     try:
@@ -75,7 +75,7 @@ def read_strands(filename='caca.sqs', box_side=50):
     double = gen.StrandGenerator()
     lines = infile.readlines()
     nlines = len(lines)
-    print >> sys.stdout, "Found %i lines" % (nlines)
+    print("Found %i lines" % (nlines), file=sys.stdout)
 
     box = np.array ([float(box_side), float(box_side), float(box_side)], np.float64)
     s = base.System(box)
@@ -99,12 +99,12 @@ def read_strands(filename='caca.sqs', box_side=50):
             type_circular = 'circular'
         if line.find('RW') >= 0:
             bool_rw = True
-         
+
         # Parse input and output structures in lorenzo format
         raw_seq = line.split()[-1]
 
         import random
-        raw_seq2 = "" 
+        raw_seq2 = ""
         for x in raw_seq:
             if x in ['x', 'X']:
                 raw_seq2 += random.choice(['A','C','G','T'])
@@ -117,7 +117,7 @@ def read_strands(filename='caca.sqs', box_side=50):
 
         seq = [base.base_to_number[x] for x in raw_seq2]
         length = len(raw_seq)
-        print >> sys.stdout, "Adding %s %s of %i bases" % (type_circular, type_strand, length)
+        print("Adding %s %s of %i bases" % (type_circular, type_strand, length), file=sys.stdout)
         cdm = np.random.random_sample(3) * s._box
         axis = np.random.random_sample(3)
         axis /= np.sqrt(np.dot(axis, axis))
@@ -125,22 +125,25 @@ def read_strands(filename='caca.sqs', box_side=50):
         while not success:
             if not bool_rw:
                 success = s.add_strands(double.generate(len(seq), sequence=seq, dir=axis, \
-                                                        start_position=cdm, double=bool_double, circular=bool_circular), check_overlap=True)
+                                                        start_pos=cdm, double=bool_double, circular=bool_circular), check_overlap=True)
             else:
                 success = s.add_strands(double.generate_rw(sequence=seq, start_pos=cdm))
-            
+
             cdm = np.random.random_sample(3) * s._box
             axis = np.random.random_sample(3)
             axis /= np.sqrt(np.dot(axis, axis))
-            print >> sys.stdout, "  try again with %i" % (i)
-        print >> sys.stdout, "  done %i" % (i)
+            print("  try again with %i" % (i), file=sys.stdout)
+        print("  done %i" % (i), file=sys.stdout)
         i += 1
 
     s.print_lorenzo_output("generated.dat", "generated.top")
 
 
+read_strands("REMOVE_ME.txt")
+
 def main():
     """Parse command line options"""
+
 
     try:
         box_side = float(sys.argv[1])

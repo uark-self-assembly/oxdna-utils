@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 try:
@@ -18,28 +18,28 @@ for i in range (54):
     cdm = np.random.random_sample(3) * s._box
     axis = np.random.random_sample(3)
     axis /= np.sqrt(np.dot(axis, axis))
-    print >> sys.stderr, "Adding single strand"
+    print("Adding single strand", file=sys.stderr)
     seq = [base.base_to_number[x] for x in sa]
     while not s.add_strand(g.generate(len(sa), sequence=seq, dir=axis, start_position=cdm, double=False)):
         cdm = np.random.random_sample(3) * s._box
         axis = np.random.random_sample(3)
         axis /= np.sqrt(np.dot(axis, axis))
-        print >> sys.stderr, "  riprovo %i" % (i)
-        print >> sys.stderr, "  done %i" % (i)
+        print("  riprovo %i" % (i), file=sys.stderr)
+        print("  done %i" % (i), file=sys.stderr)
 
 sb = "CATAACACAATCACATCTCACCACCAAACTTCA"
 for i in range (6):
     cdm = np.random.random_sample(3) * s._box
     axis = np.random.random_sample(3)
     axis /= np.sqrt(np.dot(axis, axis))
-    print >> sys.stderr, "Adding single strand"
+    print("Adding single strand", file=sys.stderr)
     seq = [base.base_to_number[x] for x in sb]
     while not s.add_strand(g.generate(len(sb), sequence=seq, dir=axis, start_position=cdm, double=False)):
         cdm = np.random.random_sample(3) * s._box
         axis = np.random.random_sample(3)
         axis /= np.sqrt(np.dot(axis, axis))
-        print >> sys.stderr, "  riprovo %i" % (i)
-        print >> sys.stderr, "  done %i" % (i)
+        print("  riprovo %i" % (i), file=sys.stderr)
+        print("  done %i" % (i), file=sys.stderr)
 
 sa = "CACTAACATACAACATCTCATAACACAATCACA"
 sb =         "TGAGATGTGATTGTGTTATGAGATG"
@@ -47,13 +47,13 @@ for i in range (120):
     cdm = np.random.random_sample(3) * s._box
     axis = np.random.random_sample(3)
     axis /= np.sqrt(np.dot(axis, axis))
-    print >> sys.stderr, "Adding double"
+    print("Adding double", file=sys.stderr)
     while not s.add_strands (g.generate_double_offset(seqA=sa, seqB=sb, offset=13, dir=axis, start_pos=cdm)):
         cdm = np.random.random_sample(3) * s._box
         axis = np.random.random_sample(3)
         axis /= np.sqrt(np.dot(axis, axis))
-        print >> sys.stderr, "  riprovo %i" % (i)
-        print >> sys.stderr, "  done %i" % (i)
+        print("  riprovo %i" % (i), file=sys.stderr)
+        print("  done %i" % (i), file=sys.stderr)
 
 #s.renumber ()
 s.print_vmd_xyz_output ("pallinz.xyz", same_colors=True)

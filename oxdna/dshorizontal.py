@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 try:
@@ -40,7 +40,7 @@ def read_strands():
 
     lines = infile.readlines()
     nlines = len(lines)
-    print >> sys.stderr, "Found %i lines" % (nlines)
+    print("Found %i lines" % (nlines), file=sys.stderr)
     s = base.System(np.array ([float(side), float(side), float(side)], np.float64))
     i = 1 
     for line in lines:
@@ -52,7 +52,7 @@ def read_strands():
             line = line.split()[-1]
             seq = [base.base_to_number[x] for x in line]
             length = len(line)
-            print >> sys.stderr, "Adding duplex of %i bases" % (length)
+            print("Adding duplex of %i bases" % (length), file=sys.stderr)
             cdm = np.random.random_sample(3) * s._box
             axis = np.random.random_sample(3)
             axis /= np.sqrt(np.dot(axis, axis))
@@ -62,20 +62,20 @@ def read_strands():
                 cdm = np.random.random_sample(3) * s._box
                 axis = np.random.random_sample(3)
                 axis /= np.sqrt(np.dot(axis, axis))
-                print >> sys.stderr, "  riprovo %i" % (i)
-            print >> sys.stderr, "  done %i" % (i)
+                print("  riprovo %i" % (i), file=sys.stderr)
+            print("  done %i" % (i), file=sys.stderr)
         else:
             seq = [base.base_to_number[x] for x in line]
             cdm = np.random.random_sample(3) * s._box
             axis = np.random.random_sample(3)
             axis /= np.sqrt(np.dot(axis, axis))
-            print >> sys.stderr, "Adding single strand of %i bases" % (len(line))
+            print("Adding single strand of %i bases" % (len(line)), file=sys.stderr)
             while not s.add_strand(double.generate(len(line), sequence=seq, dir=axis, start_position=cdm, double=False)):
                 cdm = np.random.random_sample(3) * s._box
                 axis = np.random.random_sample(3)
                 axis /= np.sqrt(np.dot(axis, axis))
-                print >> sys.stderr, "  riprovo %i" % (i)
-            print >> sys.stderr, "  done %i" % (i)
+                print("  riprovo %i" % (i), file=sys.stderr)
+            print("  done %i" % (i), file=sys.stderr)
         #print >> sys.stderr, "Added strand..."
         i += 1
 

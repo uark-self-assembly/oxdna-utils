@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import base
 import readers
@@ -31,8 +31,8 @@ while s:
     base.Logger.log("Working on conf %i..." % niter, base.Logger.INFO)
 	
     for strand in s._strands:
-		diff = np.rint(strand.cm_pos / s._box ) * s._box
-		s.translate (-diff)
+        diff = np.rint(strand.cm_pos / s._box ) * s._box
+        s.translate (-diff)
 
     if cdm20:
         cdm = np.array ([0.,0.,0.])

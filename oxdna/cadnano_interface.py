@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 try:
@@ -34,10 +34,10 @@ class vh_nodes(object):
             self.end.append(end_index)
 
 def print_usage():
-    print >> sys.stderr, "usage: %s source cadnano_type [nupack|box_length]" % sys.argv[0]
-    print >> sys.stderr, "cadnano_type: lattice type, either sq (square lattice) or he (honeycomb lattice)"
-    print >> sys.stderr, "nupack: produce a scaffold-staple pattern file for feeding to nupack"
-    print >> sys.stderr, "box_length: choose the size of the simulation box (in simulation units)"
+    print("usage: %s source cadnano_type [nupack|box_length]" % sys.argv[0], file=sys.stderr)
+    print("cadnano_type: lattice type, either sq (square lattice) or he (honeycomb lattice)", file=sys.stderr)
+    print("nupack: produce a scaffold-staple pattern file for feeding to nupack", file=sys.stderr)
+    print("box_length: choose the size of the simulation box (in simulation units)", file=sys.stderr)
     sys.exit()
 
 def vhelix_rotation_origami_sq(direction, perp):
@@ -160,18 +160,18 @@ def add_slice(cuda_system, vhelix, begin, end, nodes, strands, pos, dir, perp, r
     # add a slice of the virtual helix to the slice system, taking into account skips and loops
     length_change_begin = 0
     length_change_end = 0
-    
+
     if (vhelix.num % 2 + strand_type) % 2 == 0 : # strand and even num or staple and odd num
         for i in vhelix.skip[:begin]:
             length_change_begin -= int(i)
         for i in vhelix.skip[:end+1]:
             length_change_end -= int(i)
-            
+
         for i in vhelix.loop[:begin]:
             length_change_begin += int(i)
         for i in vhelix.loop[:end+1]:
             length_change_end += int(i)
-    
+
         begin_slice = begin + length_change_begin
         end_slice = end + 1 + length_change_end
 
@@ -180,7 +180,7 @@ def add_slice(cuda_system, vhelix, begin, end, nodes, strands, pos, dir, perp, r
             length_change_end -= int(i)
         for i in vhelix.skip[begin+1:]:
             length_change_begin -= int(i)
-            
+
         for i in vhelix.loop[end:]:
             length_change_end += int(i)
         for i in vhelix.loop[begin+1:]:
@@ -200,17 +200,17 @@ def add_slice_nupack(vhelix, strand_number, begin_helix, end_helix, index_lookup
     if (vhelix.num % 2 + strand_type) % 2 == 0 : # strand and even num or staple and odd num
         for i in vhelix.skip[begin_helix:end_helix+1]:
             length_change -= int(i)
-            
+
         for i in vhelix.loop[begin_helix:end_helix+1]:
             length_change += int(i)
-    
+
     else:
         for i in vhelix.skip[end_helix:begin_helix+1]:
             length_change -= int(i)
-            
+
         for i in vhelix.loop[end_helix:begin_helix+1]:
             length_change += int(i)
-            
+
     if (strand_type + vhelix.num % 2) % 2 == 0:
         iter_length = end_helix - begin_helix + 1 + length_change
     else:
@@ -366,7 +366,7 @@ def generate_vhelices_origami_sq(vhelix_direction, vhelix_perp, h, sequence_file
     for i in range(len(helix_angles)):
         if i % 32 == 31:
             helix_angles[i] = 1080 * np.pi/180 - sum
-            
+
     # make the virtual helices
     if h.num % 2 == 0:
         pos = np.array([h.col * DIST_SQUARE, h.row * DIST_SQUARE, 0])
@@ -414,7 +414,7 @@ def generate_vhelices_origami_he(vhelix_direction, vhelix_perp, h, sequence_file
         elif modi in (19,20):
             helix_angles[i] = 28.476 * np.pi/180
         else:
-            helix_angles[i] = 720./21 * (np.pi/180.) 
+            helix_angles[i] = 720./21 * (np.pi/180.)
 
     # make sure it's periodic
     sum = 0
@@ -466,9 +466,9 @@ class vstrands (object):
         dr = DIST_SQUARE * (max(rows) - min(rows) + 2)
         dc = DIST_SQUARE * (max(cols) - min(cols) + 2)
         dl = 0.34 * (max(lens) + 2)
-        
+
         return 2*max([dr,dc,dl]) * BOX_FACTOR
-    
+
     def __str__ (self):
         a = '{\n"vstrands":[\n'
         if len(self.vhelices) > 0:
@@ -507,7 +507,7 @@ class vhelix (object):
         else:
             print >> sys.stderr, "cannot add square that is not scaf or stap. Dying now"
             sys.exit (-1)
-    
+
     def __str__ (self):
         a = '{\n'
 
@@ -524,14 +524,14 @@ class vhelix (object):
                 a = a + str(e) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"loop":['
         if len(self.loop) > 0:
             for e in self.loop:
                 a = a + str(e) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"stap_colors":['
         if len (self.stap_colors) > 0:
             for e in self.stap_colors:
@@ -542,21 +542,21 @@ class vhelix (object):
         a = a + '"row":' + str(self.row) + ',\n'
         a = a + '"col":' + str(self.col) + ',\n'
         a = a + '"num":' + str(self.num) + ',\n'
-        
+
         a = a + '"scafLoop":['
         if len(self.scafLoop) > 0:
             for i in self.scafLoop:
                 a = a + str(i) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"stap":['
         if len(self.stap) > 0:
             for i in self.stap:
                 a = a + str(i) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"scaf":['
         if len(self.scaf) > 0:
             for i in self.scaf:
@@ -614,27 +614,27 @@ class square (object):
 
         # shouldn't get to here
         base.Logger.log('unexpected square array', base.Logger.WARNING)
-        
+
 def parse_cadnano (path):
     if not isinstance (path, str):
         print >> sys.stderr, "must be a path. Aborting"
         sys.exit (-1)
-    
+
     try:
         inp = open (path, 'r')
     except:
         print >> sys.stderr, "Could not open", path, "Aborting now"
         sys.exit (-1)
-    
+
     string = ''
     for line in inp.readlines ():
         string += line
     inp.close()
 
     string = string[1:len(string)-1] # remove the outer bracket par
-    
+
     ret = vstrands ()
-    
+
     while string.find('{') > 0:
         i = string.find('{')
         j = string.find('}')
@@ -655,9 +655,9 @@ def parse_helix (string):
         j = string.index ('}')
     except:
         j = len(string)
-    
+
     string = string[i:j].strip()
-    
+
     ret = vhelix ()
 
     lines = []
@@ -687,22 +687,22 @@ def parse_helix (string):
     for line in lines:
         line = line.strip()
         if line.startswith('"stapLoop"'):
-            ret.stapLoop = map (int, re.findall(r'\d+', line))
+            ret.stapLoop = list(map (int, re.findall(r'\d+', line)))
         elif line.startswith('"skip"'):
-            ret.skip = map (int, re.findall(r'\d+', line))
+            ret.skip = list(map (int, re.findall(r'\d+', line)))
         elif line.startswith('"loop"'):
-            ret.loop = map (int, re.findall(r'\d+', line))
+            ret.loop = list(map (int, re.findall(r'\d+', line)))
         elif line.startswith('"stap_colors"'):
             # not implemented at the moment
             pass
         elif line.startswith('"scafLoop"'):
-            ret.scafLoop = map (int, re.findall(r'\d+', line))
+            ret.scafLoop = list(map (int, re.findall(r'\d+', line)))
         elif line.startswith('"stap"'):
             i = line.index('[')
             j = line.rindex(']')
             words = line[i+1+1:j-1].split('],[')
             for word in words:
-                V_0, b_0, V1, b_1 = map(int, word.split(','))
+                V_0, b_0, V1, b_1 = list(map(int, word.split(',')))
                 sq = square (V_0, b_0, V1, b_1)
                 ret.add_square (sq, 'stap')
         elif line.startswith('"scaf"'):
@@ -711,15 +711,15 @@ def parse_helix (string):
             words = line[i+1+1:j-1].split('],[')
             base = 0
             for word in words:
-                V_0, b_0, V1, b_1 = map(int, word.split(','))
+                V_0, b_0, V1, b_1 = list(map(int, word.split(',')))
                 sq = square (V_0, b_0, V1, b_1)
                 ret.add_square (sq, 'scaf')
         elif line.startswith('"row"'):
-            ret.row = map(int, re.findall(r'(\d+)', line))[0]
+            ret.row = list(map(int, re.findall(r'(\d+)', line)))[0]
         elif line.startswith('"num"'):
-            ret.num = map(int, re.findall(r'(\d+)', line))[0]
+            ret.num = list(map(int, re.findall(r'(\d+)', line)))[0]
         elif line.startswith('"col"'):
-            ret.col = map(int, re.findall(r'(\d+)', line))[0]
+            ret.col = list(map(int, re.findall(r'(\d+)', line)))[0]
         else:
             pass #print >> sys.stderr, "Unknown line... Passing"
 
@@ -838,7 +838,7 @@ def main():
             strands, helix_angles, pos, rot, vhelix_direction, vhelix_perp = generate_vhelices_origami_he(vhelix_direction_initial, vhelix_perp_initial, h, sequence_file, single_strand_system, vhelix_counter)
 
         nodes = build_nodes(h)
-        
+
         # read the scaffold squares and add strands to slice_sys
         i = 0
         for s in h.scaf:
@@ -921,7 +921,7 @@ def main():
                         partner_list_scaf.append([s.V_0, s.b_0])
                     found_partner = False
                 else:
-                    base.Logger.log("unexpected square array", base.Logger.WARNING)                
+                    base.Logger.log("unexpected square array", base.Logger.WARNING)
             i += 1
 
         # read the staple squares and add strands to slice_sys
@@ -1007,7 +1007,7 @@ def main():
                         partner_list_stap.append([s.V_0, s.b_0])
                     found_partner = False
                 else:
-                    base.Logger.log("unexpected square array", base.Logger.WARNING)                
+                    base.Logger.log("unexpected square array", base.Logger.WARNING)
             i += 1
         vhelix_counter += 1
 
@@ -1072,7 +1072,7 @@ def main():
                 else:
                     for k in range(1, len(join)):
                         joined_strand = joined_strand.append(slice_sys._strands[join[k]])
-                    
+
                 final_sys.add_strand(joined_strand, check_overlap = False)
 
                 # This is a bug fix. Ben 12/2/14
@@ -1086,22 +1086,22 @@ def main():
                 for k in joining_range:
                     vh_vb2nuc_final.add_strand(join[k], vh_vb2nuc, continue_join = True)
                 vh_vb2nuc_final.add_strand(join[k + 1], vh_vb2nuc, continue_join = False)
-                    
+
                 if single_strand_system == 1:
                     final_sys._strands[0].set_sequence(sequences[0])
-    
+
             if nupack:
                 per_strand_nucleotide_counter = 0
                 found_staple = False
                 for k in range(len(join)):
                     record_joined.append(join[k])
                     nucleotide_counter = 0
-                    for (vhelix,vbase), [scaf_index, scaf_nucleotide] in vhelix_to_scaffold.iteritems():
+                    for (vhelix,vbase), [scaf_index, scaf_nucleotide] in vhelix_to_scaffold.items():
                         if scaf_index == join[k]:
                             vhelix_to_scaffold_final[(vhelix, vbase)] = [0, scaf_nucleotide + per_strand_nucleotide_counter]
                             nucleotide_counter += 1
 
-                    for (staple_index, staple_nucleotide), [vhelix, vbase] in staple_to_vhelix.iteritems():
+                    for (staple_index, staple_nucleotide), [vhelix, vbase] in staple_to_vhelix.items():
                         if staple_index == join[k]:
                             staple_to_vhelix_final[(len(staple_to_scaffold), staple_nucleotide + per_strand_nucleotide_counter)] = [vhelix, vbase]
                             nucleotide_counter += 1
@@ -1134,7 +1134,7 @@ def main():
     ## also reverse the vhelix_vbase_to_nucleotide order so it corresponds to the reversed system
     vh_vb2nuc_rev = oru.vhelix_vbase_to_nucleotide()
     # count the number of nucleotides up to but not including the nucleotides in strand ii
-    nnucs_to_here = range(rev_sys._N_strands)
+    nnucs_to_here = [idx for idx in range(rev_sys._N_strands)]
     nuc_total = 0
     for strandii, strand in enumerate(rev_sys._strands):
         nnucs_to_here[strandii] = nuc_total
@@ -1159,13 +1159,13 @@ def main():
     for i in range(len(cadsys.vhelices)):
         vhelix_pattern[cadsys.vhelices[i].num] = (cadsys.vhelices[i].row,cadsys.vhelices[i].col)
 
-    fout = open("virt2nuc", "w")
+    fout = open("virt2nuc", "wb")
     pickle.dump((vh_vb2nuc_rev, vhelix_pattern), fout)
     #pickle.dump((vh_vb2nuc_final, vhelix_pattern), fout)
     fout.close()
 
     base.Logger.log("printed index file virt2nuc", base.Logger.INFO)
-    
+
     if nupack == 0:
         #final_sys.print_lorenzo_output ("prova.conf", "prova.top")
         rev_sys.print_lorenzo_output ("prova.conf", "prova.top")
@@ -1183,7 +1183,7 @@ def main():
         for recorded_staple_index in staple_indices:
             if recorded_staple_index not in record_joined:
                 nucleotide_counter = 0
-                for (staple_index, staple_nucleotide), [vhelix, vbase] in staple_to_vhelix.iteritems():
+                for (staple_index, staple_nucleotide), [vhelix, vbase] in staple_to_vhelix.items():
                     if staple_index == recorded_staple_index:
                         staple_to_vhelix_final[(len(staple_to_scaffold), staple_nucleotide)] = [vhelix, vbase]
                         nucleotide_counter += 1
@@ -1202,5 +1202,5 @@ def main():
         fout = open("output.sts", "w")
         pickle.dump(staple_to_scaffold, fout)
         fout.close()
-        
+
 main()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 import random as rnd
@@ -9,26 +9,26 @@ lambda_cdm = 0.1
 lambda_patch = 0.1
 
 if not len(sys.argv) >= 3:
-	print >> sys.stderr, "Usage:", sys.argv[0], "configuration", "topology", "lambda_cmd", "lambda_patch"
+	print("Usage:", sys.argv[0], "configuration", "topology", "lambda_cmd", "lambda_patch", file=sys.stderr)
 	sys.exit(2)
 
 try:
 	lambda_cdm = float(sys.argv[3])
 	lambda_patch = float(sys.argv[4])
 except:
-	print >> sys.stderr, "Could not read in the lambdas..."
+	print("Could not read in the lambdas...", file=sys.stderr)
 	sys.exit(3)
 
 try:
-	print >> sys.stderr, "Reading system", sys.argv[1], sys.argv[2]
+	print("Reading system", sys.argv[1], sys.argv[2], file=sys.stderr)
 	r = readers.LorenzoReader (sys.argv[1], sys.argv[2])
 	s = r.get_system()
 except:
-	print >> sys.stderr, "Could not read in ", sys.argv[1], sys.argv[2]
+	print("Could not read in ", sys.argv[1], sys.argv[2], file=sys.stderr)
 	sys.exit(-2)
 
 
-print >> sys.stderr, "Assuming n_in_tetramer = 132"
+print("Assuming n_in_tetramer = 132", file=sys.stderr)
 
 forces = open ("ext_einst.dat", 'w')
 
@@ -37,17 +37,17 @@ forces = open ("ext_einst.dat", 'w')
 for i, n in enumerate(s.get_nucleotide_list()):
 	if i%n_in_tetramer == 12:
 		#print n.index, n.cm_pos
-		print >> forces, "{\ntype=trap\nparticle=%d\nstiff=%g\npos0=%g, %g, %g\nrate=0.\ndir=0., 0., 0.\ngroup_name=coms\n}\n\n" % (n.index, lambda_cdm, n.cm_pos[0], n.cm_pos[1], n.cm_pos[2])
+		print("{\ntype=trap\nparticle=%d\nstiff=%g\npos0=%g, %g, %g\nrate=0.\ndir=0., 0., 0.\ngroup_name=coms\n}\n\n" % (n.index, lambda_cdm, n.cm_pos[0], n.cm_pos[1], n.cm_pos[2]), file=forces)
 
 # for each "patch":
 patches = [30, 30+33, 30 + 66, 30 + 99]
-print >> sys.stderr, "patch indexes: ", patches
+print("patch indexes: ", patches, file=sys.stderr)
 for i, n in enumerate(s.get_nucleotide_list()):
 	if i%n_in_tetramer in patches:
 		#print n.index, n.cm_pos
-		print >> forces, "{\ntype=trap\nparticle=%d\nstiff=%g\npos0=%g, %g, %g\nrate=0.\ndir=0., 0., 0.\ngroup_name=patches\n}\n\n" % (n.index, lambda_patch, n.cm_pos[0], n.cm_pos[1], n.cm_pos[2])
+		print("{\ntype=trap\nparticle=%d\nstiff=%g\npos0=%g, %g, %g\nrate=0.\ndir=0., 0., 0.\ngroup_name=patches\n}\n\n" % (n.index, lambda_patch, n.cm_pos[0], n.cm_pos[1], n.cm_pos[2]), file=forces)
 
 forces.close()
 
-print >> sys.stderr, "External forces file ext_einst.dat printed"
+print("External forces file ext_einst.dat printed", file=sys.stderr)
 

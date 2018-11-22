@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # find pitch of a double strand
 # WARNING: assumes that 
@@ -140,8 +140,8 @@ pitch = 2 * np.pi / av_angle
 
 # print out everything
 r2d = 180/np.pi
-print "pitch: %f bp/turn" % pitch
-print av_angle * r2d, av_angle2 * r2d*r2d, standard_deviation, standard_deviation/np.sqrt(confs_used)
+print("pitch: %f bp/turn" % pitch)
+print(av_angle * r2d, av_angle2 * r2d*r2d, standard_deviation, standard_deviation/np.sqrt(confs_used))
 
 f_out = open("angle_series.dat", "w")
 for i in range(len(conf_av_angle)):
