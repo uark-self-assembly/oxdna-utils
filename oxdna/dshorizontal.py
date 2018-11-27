@@ -4,7 +4,7 @@ import sys
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import base
 import generators as gen
 
@@ -17,7 +17,7 @@ def double_strands():
     s.add_strands(g.generate(25, dir=[1, 1, 1], start_position=[-10, -10, -10]))
     s.print_crepy_output ("prova.mgl")
     s.print_lorenzo_output ("prova.conf", "prova.top")
-    
+
 def tetramers():
     g = gen.TetramerGenerator()
     s = base.System ([20, 20, 20])
@@ -42,7 +42,7 @@ def read_strands():
     nlines = len(lines)
     print("Found %i lines" % (nlines), file=sys.stderr)
     s = base.System(np.array ([float(side), float(side), float(side)], np.float64))
-    i = 1 
+    i = 1
     for line in lines:
         line = line.upper().strip()
         # skip empty lines
@@ -83,4 +83,3 @@ def read_strands():
     s.print_lorenzo_output("prova.conf", "prova.top")
 
 read_strands()
-

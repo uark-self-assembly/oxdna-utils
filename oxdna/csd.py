@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 from utils import get_angle
@@ -84,18 +84,18 @@ def get_csd(syst):
                                 q = particles[n2.strand/2]
                                 p.add_neigh(q)
                                 q.add_neigh(p)
-                            
+
                             n2 = n2.next
 
     clusters = [1, ] * N
     csd = [0, ] * (N+1)
-    
+
     for i in range(N):
         flip_neighs(particles, i, clusters)
 
     for i in range(N):
         csd[clusters[i]] += 1
-    
+
     return csd
 
 if len(sys.argv) < 3:
@@ -108,7 +108,7 @@ else: N_skip = 0
 
 output = sys.argv[1] + ".csd"
 E_output = output + ".E"
-    
+
 l = readers.LorenzoReader(sys.argv[1], sys.argv[2])
 s = l.get_system(only_strand_ends=True, N_skip=N_skip)
 
@@ -122,7 +122,7 @@ E_N = [0, ] * (N+1)
 while s:
     ncsd = get_csd(s)
     nbonds = 0
-    for i in range(1, N+1): 
+    for i in range(1, N+1):
         csd[i] += ncsd[i]
         nbonds += ncsd[i] * (i-1)
 
@@ -144,4 +144,3 @@ for i in range(1, len(csd)):
 f.close()
 
 base.Logger.log("Output printed on '%s' and '%s'" % (output, E_output), base.Logger.INFO)
-

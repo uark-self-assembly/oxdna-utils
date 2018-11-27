@@ -4,7 +4,7 @@ import sys, os
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 
 GROOVE_ENV_VAR = 'OXDNA_GROOVE'
 
@@ -44,7 +44,7 @@ except:
     print("Could not open file '%s' for reading. Aborting" % topfile, file=sys.stderr)
     sys.exit(2)
 
-# return parts of a string 
+# return parts of a string
 def partition(s, d):
     if d in s:
         sp = s.split(d, 1)
@@ -88,7 +88,7 @@ base_to_number = {'A' : 0, 'a' : 0, 'G' : 1, 'g' : 1,
 def get_rotation_matrix(axis, anglest):
     # the argument anglest can be either an angle in radiants
     # (accepted types are float, int or np.float64 or np.float64)
-    # or a tuple [angle, units] where angle a number and 
+    # or a tuple [angle, units] where angle a number and
     # units is a string. It tells the routine whether to use degrees,
     # radiants (the default) or base pairs turns
     if not isinstance (anglest, (np.float64, np.float32, float, int)):
@@ -100,18 +100,18 @@ def get_rotation_matrix(axis, anglest):
             else:
                 angle = float(anglest[0])
         else:
-            angle = float(anglest[0]) 
+            angle = float(anglest[0])
     else:
         angle = float(anglest) # in degrees, I think
-    
+
     axis = np.array(axis)
     axis /= np.sqrt(np.dot(axis, axis))
-    
+
     ct = np.cos(angle)
     st = np.sin(angle)
     olc = 1. - ct
     x, y, z = axis
-    
+
     return np.array([[olc*x*x+ct, olc*x*y-st*z, olc*x*z+st*y],
                     [olc*x*y+st*z, olc*y*y+ct, olc*y*z-st*x],
                     [olc*x*z-st*y, olc*y*z+st*x, olc*z*z+ct]])
@@ -134,7 +134,7 @@ nn5 = [None for x in range(nnucl)]
 i = 0
 for line in lines[1:]:
     words = line.split()
-    strandid[i] = int(words[0]) -1 
+    strandid[i] = int(words[0]) -1
     basetype[i] = words[1]
     nn3[i] = int (words[2])
     nn5[i] = int (words[3])
@@ -161,7 +161,7 @@ while True:
     a1s = [None for x in range(nnucl)]
     a2s = [None for x in range(nnucl)]
     a3s = [None for x in range(nnucl)]
-    
+
     try:
         times.append (int(inp.readline().split()[2]))
         box = np.array([float(x) for x in inp.readline().split()[2:]])
@@ -169,8 +169,8 @@ while True:
     except:
         print("## End of trajectory...", nconfs, file=sys.stderr)
         break
-    
-    inp.readline () # to remove the energy line 
+
+    inp.readline () # to remove the energy line
     for i in range (nnucl):
         line = inp.readline()
         words = line.split()
@@ -208,7 +208,7 @@ while True:
             print("O %lf %lf %lf" % (rnow[0], rnow[1], rnow[2]), file=out)
     elif pdb:
         # header
-        res = "HEADER    frame t= " + str(times[nconfs])+ " \nMODEL        0 \nREMARK ## 0,0\n" 
+        res = "HEADER    frame t= " + str(times[nconfs])+ " \nMODEL        0 \nREMARK ## 0,0\n"
         for i in range (nnucl):
             sid = strandid[i]
             stringid = strtypes[((sid + 1) % len(strtypes))]
@@ -226,10 +226,10 @@ while True:
 
             # magic to get nice ellipse of the base particle
             I_b = np.matrix( ((1.1,0,0),(0,1.5,0),(0,0,2.2)) )
-            
+
             R = np.matrix ((a1s[i], np.cross (a3s[i], a1s[i]), a3s[i]))
             I_l = R.T*I_b*R
-            
+
             anis = np.multiply(-1,I_l)
             anis[0,0] = (I_l[1,1]+I_l[2,2]-I_l[0,0])/2.0
             anis[1,1] = (I_l[0,0]+I_l[2,2]-I_l[1,1])/2.0
@@ -292,7 +292,7 @@ if pdb:
     for i in range (nnucl):
         if nn5[i] >= 0:
             commands.append ("bond #0:%i.A,%i.A" % (i, i + 1))
-    
+
     # sistemiamo il colore degli strands (dopo quello delle basi)
     # DOPO aver ricreato i legami
     for i in range (len (strtypes)):
@@ -302,10 +302,10 @@ if pdb:
         commands.append ("col yellow #0:%s@K" % (strtypes[i]))
         commands.append ("col cornflower blue #0:%s@P" % (strtypes[i]))
         commands.append ("bondcolor %s #0:%s" % (mycolors[i], strtypes[i]))
-    
+
     # facciamo gli ellissoidi, no? visto che ci siamo
     commands.append ("aniso scale 0.75 smoothing 4")
-    
+
     # sistemiamo la dimensione dei legami
     commands.append ("setattr m stickScale 0.6 #0")
 
@@ -315,4 +315,3 @@ if pdb:
         #print c
         print(c, file=f)
     f.close ()
-

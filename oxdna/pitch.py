@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 # find pitch of a double strand
-# WARNING: assumes that 
+# WARNING: assumes that
 import readers
 import base
 import sys
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import utils
 import os
 import pickle
@@ -72,7 +72,7 @@ if CONF_SKIP:
 while CONF_SKIP:
     s = l.get_system()
     CONF_SKIP -= 1
-    
+
 s.map_nucleotides_to_strands()
 infile = sys.argv[3]
 try:
@@ -81,7 +81,7 @@ except:
     base.Logger.log("unable to find file %s, exit" % infile, base.Logger.CRITICAL)
     sys.exit()
 launchargs = [PROCESSDIR + 'output_bonds',infile,sys.argv[1],str(CONF_SKIP)]
-myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 s.read_H_bonds(myinput.stdout.readlines())
 interaction_list = [-1 for i in range(s._N)]
 for strand in s._strands:

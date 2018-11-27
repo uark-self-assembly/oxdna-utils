@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-#A utility that prints out the number of hydrogen bonds between different strands in the system 
+#A utility that prints out the number of hydrogen bonds between different strands in the system
 # specify the secondary structure of which strands you want to display. If you set both strands equal, it shows the bonds of the strand with itself
 #Still in beta version, tested only on few simple systems. Currently does not support pseudoknots!
 import base
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
-import readers 
+import readers
 import subprocess
 import tempfile
 
@@ -29,48 +29,48 @@ def conf2dot(system,sid1,sid2):
 		result = ['.'] * len(system._strands[sid1]._nucleotides)
 	elif sid1 != sid2:
 		result = ['.'] * len(system._strands[sid1]._nucleotides)  + ['+'] +  ['.'] * len(system._strands[sid2]._nucleotides)
-				
+
 	for nucleotide_id in range(len(system._strands[sid1]._nucleotides)):
 		nucleotide = system._strands[sid1]._nucleotides[nucleotide_id]
 		if(len(nucleotide.interactions) > 1):
 			print('One nucleotide has more than 1 h-bonding interaction, skipping...', file=sys.stderr)
 			return ''
 		elif len(nucleotide.interactions) == 1:
-			second_id =  system._nucleotides[nucleotide.interactions[0]].index 
+			second_id =  system._nucleotides[nucleotide.interactions[0]].index
 			sid = system._nucleotide_to_strand[second_id]
 			if (sid == sid2 ) and result[nucleotide_id] == '.':
 				local_id = offset + second_id - system._strands[sid]._nucleotides[0].index
-				result[nucleotide_id] = '(' 
+				result[nucleotide_id] = '('
 				result[local_id] = ')'
 
 			elif (sid == sid1 ) and result[nucleotide_id] == '.':
 				local_id =  second_id - system._strands[sid]._nucleotides[0].index
-				result[nucleotide_id] = '(' 
+				result[nucleotide_id] = '('
 				result[local_id] = ')'
 	if sid1 != sid2:
-		
+
 		for nucleotide_id in range(len(system._strands[sid2]._nucleotides)):
 			nucleotide = system._strands[sid1]._nucleotides[nucleotide_id]
 			if(len(nucleotide.interactions) > 1):
 				print('One nucleotide has more than 1 h-bonding interaction, skipping...', file=sys.stderr)
 				return ''
 			elif len(nucleotide.interactions) == 1:
-				second_id =  system._nucleotides[nucleotide.interactions[0]].index 
+				second_id =  system._nucleotides[nucleotide.interactions[0]].index
 				sid = system._nucleotide_to_strand[second_id]
 				if (sid == sid2) and result[nucleotide_id] == '.':
 					local_id = offset + second_id - system._strands[sid]._nucleotides[0].index
-					result[nucleotide_id] = '(' 
+					result[nucleotide_id] = '('
 					result[local_id] = ')'
 
-	return ''.join(result)					
-					
+	return ''.join(result)
+
 
 if (len(sys.argv) < 5):
   print('Usage %s input_file trajectory_file strand_id1 strand_id2' % sys.argv[0])
   sys.exit()
 
 
-  
+
 #now get topology file name:
 inputfile = sys.argv[1]
 conffile = sys.argv[2]
@@ -131,5 +131,3 @@ while mysystem != False:
 	print(notation)
 	counter += 1
 	mysystem = myreader.get_system()
-
-

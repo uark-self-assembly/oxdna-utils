@@ -5,10 +5,10 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
-import external_forces as forces 
+import external_forces as forces
 
 if len(sys.argv) < 4:
     base.Logger.log("Usage is %s configuration topology external_forces_file" % sys.argv[0], base.Logger.CRITICAL)
@@ -58,5 +58,3 @@ while s:
         pass
     s = l.get_system()
     niter += 1
-
-

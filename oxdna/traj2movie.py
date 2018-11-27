@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 import getopt
@@ -55,12 +55,12 @@ devnull = open("/dev/null", "w")
 while s:
     base.Logger.log("Working on conf %i..." % niter, base.Logger.INFO)
     s.print_ribbon_output("__ggg__.mgl", same_colors=True)
-    
+
     a = sp.Popen ([crepy, "__ggg__.mgl", "--output=__ggg__.pov", "-o", crepyopts], stdout=devnull)
     a.wait()
     if a.returncode != 0:
         base.Logger.die ("crepy e' morto")
-    
+
     pngfile = "__%s.png" % niter
     a = sp.Popen (["povray", "+A", "+r", "-D", "+H%s" % (str(height)), "+W%s" % (str(width)),"+O%s" % pngfile, "__ggg__.pov"], stdout=devnull, stderr=devnull)
     a.wait()
@@ -88,5 +88,3 @@ print("mencoder mf://@__ginocchio__ -mf w=%s:h=%s:fps=%s:type=png -ovc xvid -xvi
 b = sp.Popen (["mencoder", "mf://@__ginocchio__", "-mf","w=%s:h=%s:fps=%s:type=png" % (str(width), str(height), str(fps)), "-ovc", "xvid", "-xvidencopts", "bitrate=200", "-o", "output.avi"])
 #, "-ovc xvid -xvidencopts bitrate=200 -o output.avi"])
 b.wait()
-
-

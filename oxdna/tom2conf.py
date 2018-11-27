@@ -4,7 +4,7 @@ import sys
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import base
 import generators as gen
 
@@ -21,7 +21,7 @@ def read_tom_strand_from_string(strandline,box):
 		posback = []
 		posbackbase = []
 		posalign = []
-		
+
 		nuctype = int(vals[valindex])
 		valindex += 1
 		for j in range(3):
@@ -37,7 +37,7 @@ def read_tom_strand_from_string(strandline,box):
                 #poscm = poscm % box
 		n = base.Nucleotide(poscm,posbackbase,posalign,nuctype)
 		s.add_nucleotide(n)
-	return s	
+	return s
 
 def read_tom_strands_from_file(filename,box = 20):
 	infile = open(filename,'r')
@@ -46,16 +46,16 @@ def read_tom_strands_from_file(filename,box = 20):
 		if len(line) > 2:
 			strand = read_tom_strand_from_string(line,box)
 			mysys.add_strand(strand, check_overlap=False)
-	
+
 	return mysys
-	
+
 
 if (len(sys.argv) < 2):
 	print("Usage: %s <file_with_strands_in_tom_format> [boxsize]" % (sys.argv[0]))
 	print("File with strands has to have one strand per line in .cpp format (DNA strand(....);) as produced by the Tom's code. Boxsize has to be set to the cell size, by default it is 20")
 	sys.exit(1)
-    
-fname = sys.argv[1]    
+
+fname = sys.argv[1]
 
 box = 20
 if len(sys.argv) >= 3:
@@ -73,4 +73,3 @@ print("Output written to " , fname + ".conf", " ", fname + ".top")
     elif sys.argv[1] == "t":  tetramers()
     else:
         base.Logger.die("Unrecognized option '%s'" % sys.argv[1])'''
-

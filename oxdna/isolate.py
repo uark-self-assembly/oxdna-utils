@@ -7,8 +7,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
-
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 
 import os.path
 import sys
@@ -34,5 +33,3 @@ while s:
     r.print_lorenzo_output("isolated.dat", "isolated.top")
     s = l.get_system()
     append = True
-
-

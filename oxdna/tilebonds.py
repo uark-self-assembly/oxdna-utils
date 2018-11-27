@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
-#A utility that prints out the number of hydrogen bonds between different strands in the system 
+#A utility that prints out the number of hydrogen bonds between different strands in the system
 
 import base
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
-import readers 
+import readers
 import subprocess
 
 PROCESSDIR = os.path.join(os.path.dirname(__file__), "process_data/")
@@ -46,18 +46,18 @@ while mysystem != False:
     launchargs = [PROCESSDIR + 'output_bonds',inputfile,conffile,str(counter)]
     print("# Running output_bonds...", file=sys.stderr)
     myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
+
     print("#         Done.", file=sys.stderr)
     print("# Computing CSD...", file=sys.stderr)
 
     mysystem.read_H_bonds(myinput.stdout.readlines())
-    
+
     nmax = mysystem.N_strands
     bonds = [s.H_interactions.keys() for s in mysystem._strands]
     # C.S.D.
     clust = [i/group for i in range (nmax)]
     inclust = [0 for i in range (nmax)]
-    
+
     check = True
     while check:
         check = False
@@ -69,10 +69,10 @@ while mysystem != False:
                     csn = min (clust[i], clust[j])
                     clust[i], clust[j] = csn, csn
                     #print clust[i], clust[j]
-    
+
     for i in range (nmax):
         inclust[clust[i]] += 1
-     
+
     inclust.sort()
     inclust.reverse()
     sum = 0
@@ -83,5 +83,3 @@ while mysystem != False:
 
     counter += 1
     mysystem = myreader.get_system()
-
-

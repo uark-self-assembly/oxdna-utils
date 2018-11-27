@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 import subprocess
@@ -44,7 +44,7 @@ except:
     base.Logger.log("unable to find file %s, exit" % infile, base.Logger.CRITICAL)
     sys.exit()
 launchargs = [PROCESSDIR + 'output_bonds',infile,conffile,str(0)]
-myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+myinput = subprocess.Popen(launchargs,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 s.read_H_bonds(myinput.stdout.readlines())
 base.Logger.log("Working on conf 1", base.Logger.INFO)
 
@@ -80,4 +80,3 @@ if cdm20:
 s.print_tcl_cylinder_output(output, visibility="caca.vis", show_labels = False, show_box = False)
 
 base.Logger.log("Output printed on '%s'" % output, base.Logger.INFO)
-

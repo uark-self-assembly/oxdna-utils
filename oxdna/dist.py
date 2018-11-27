@@ -5,10 +5,10 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
-import external_forces as forces 
+import external_forces as forces
 
 if len(sys.argv) < 4:
     base.Logger.log("Usage is %s configuration id1 id2" % sys.argv[0], base.Logger.CRITICAL)
@@ -51,5 +51,3 @@ while s:
     print(s._time, np.sqrt(np.dot(dr, dr)), dr[0], dr[1], dr[2])
     s = l.get_system()
     niter += 1
-
-

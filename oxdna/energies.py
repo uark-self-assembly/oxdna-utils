@@ -1,7 +1,7 @@
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import base
 from utils import get_angle
 
@@ -13,7 +13,7 @@ def _f1(r, r0, rlow, rhigh, rclow, rchigh, blow, bhigh, a, eps, shift):
             tmp = 1. - exp(-(r - r0) * a)
             val = eps * tmp * tmp - shift
         elif r > rclow: val = eps * blow * (r - rclow)**2
-            
+
     return val
 
 def _f2(r, r0, rc, rlow, rhigh, rclow, rchigh, blow, bhigh, k):
@@ -22,23 +22,23 @@ def _f2(r, r0, rc, rlow, rhigh, rclow, rchigh, blow, bhigh, k):
 	    if r > rhigh: val = k * bhigh * (r - rchigh)**2
 	    elif r > rlow: val = k * 0.5 * ((r - r0)**2 - (rc - r0)**2)
 	    elif r > rclow: val = k * blow * (r - rclow)**2
-    
+
     return val
 
 def _f4(t, t0, ts, tc, a, b):
     val = 0.
     t -= t0
     if t < 0: t = -t
-    
+
     if t < tc :
         if t > ts: val = b * (tc - t)**2
         else: val = 1. - a * t * t
-        
+
     return val
 
 def _f5(f, xs, xc, a, b):
     val = 0.
-    
+
     if f > xc:
         if f < xs: val = b * (xc - f)**2
         elif f < 0.: val = 1. - a * f * f
@@ -49,7 +49,7 @@ def _f5(f, xs, xc, a, b):
 def _excluded_volume(rv, sigma, rstar, b, rc):
     energy = 0.
     r2 = np.dot(rv, rv)
-    
+
     if r2 < rc*rc:
         if r2 > rstar*rstar:
             rrc = np.sqrt(r2) - rc
@@ -57,7 +57,7 @@ def _excluded_volume(rv, sigma, rstar, b, rc):
         else:
             lj_part = sigma*sigma*sigma*sigma*sigma*sigma / (r2*r2*r2)
             energy = 4. * base.EXCL_EPS * (lj_part * lj_part - lj_part)
-            
+
     return energy
 
 def cross_stacking(p, q, box):
@@ -86,7 +86,7 @@ def cross_stacking(p, q, box):
     f4t4 = _f4(t4, base.CRST_THETA4_T0, base.CRST_THETA4_TS, base.CRST_THETA4_TC, base.CRST_THETA4_A, base.CRST_THETA4_B) + _f4(np.pi - t4, base.CRST_THETA4_T0, base.CRST_THETA4_TS, base.CRST_THETA4_TC, base.CRST_THETA4_A, base.CRST_THETA4_B)
     f4t7 = _f4(t7, base.CRST_THETA7_T0, base.CRST_THETA7_TS, base.CRST_THETA7_TC, base.CRST_THETA7_A, base.CRST_THETA7_B) + _f4(np.pi - t7, base.CRST_THETA7_T0, base.CRST_THETA7_TS, base.CRST_THETA7_TC, base.CRST_THETA7_A, base.CRST_THETA7_B)
     f4t8 = _f4(t8, base.CRST_THETA8_T0, base.CRST_THETA8_TS, base.CRST_THETA8_TC, base.CRST_THETA8_A, base.CRST_THETA8_B) + _f4(np.pi - t8, base.CRST_THETA8_T0, base.CRST_THETA8_TS, base.CRST_THETA8_TC, base.CRST_THETA8_A, base.CRST_THETA8_B)
-    
+
     return f2 * f4t1 * f4t2 * f4t3 * f4t4 * f4t7 * f4t8
 
 def coaxial(p, q, box):
@@ -107,14 +107,14 @@ def coaxial(p, q, box):
 
     rbackbone = q.pos_back - p.pos_back - diff
     cosphi3 = np.dot(rstackdir, (np.cross(rbackbone / np.sqrt(np.dot(rbackbone, rbackbone)), p._a1)))
-    
+
     f2 = _f2(rstackmod, base.CXST_R0, base.CXST_RC, base.CXST_RLOW, base.CXST_RHIGH, base.CXST_RCLOW, base.CXST_RCHIGH, base.CXST_BLOW, base.CXST_BHIGH, base.CXST_K)
     f4t1 = _f4(t1, base.CXST_THETA1_T0, base.CXST_THETA1_TS, base.CXST_THETA1_TC, base.CXST_THETA1_A, base.CXST_THETA1_B) + _f4(2 * np.pi - t1, base.CXST_THETA1_T0, base.CXST_THETA1_TS, base.CXST_THETA1_TC, base.CXST_THETA1_A, base.CXST_THETA1_B)
     f4t4 = _f4(t4, base.CXST_THETA4_T0, base.CXST_THETA4_TS, base.CXST_THETA4_TC, base.CXST_THETA4_A, base.CXST_THETA4_B)
     f4t5 = _f4(t5, base.CXST_THETA5_T0, base.CXST_THETA5_TS, base.CXST_THETA5_TC, base.CXST_THETA5_A, base.CXST_THETA5_B) + _f4(np.pi - t5, base.CXST_THETA5_T0, base.CXST_THETA5_TS, base.CXST_THETA5_TC, base.CXST_THETA5_A, base.CXST_THETA5_B)
     f4t6 = _f4(t6, base.CXST_THETA6_T0, base.CXST_THETA6_TS, base.CXST_THETA6_TC, base.CXST_THETA6_A, base.CXST_THETA6_B) + _f4(np.pi - t6, base.CXST_THETA6_T0, base.CXST_THETA6_TS, base.CXST_THETA6_TC, base.CXST_THETA6_A, base.CXST_THETA6_B)
     f5cosphi3 = _f5(cosphi3, base.CXST_PHI3_XS, base.CXST_PHI3_XC, base.CXST_PHI3_A, base.CXST_PHI3_B)
-    
+
     return f2 * f4t1 * f4t4 * f4t5 * f4t6 * f5cosphi3 * f5cosphi3
 
 def excluded_volume(p, q, box, nearest=False):
@@ -123,15 +123,15 @@ def excluded_volume(p, q, box, nearest=False):
     # BASE-BASE
     rcenter = q.pos_base - p.pos_base - diff
     energy = _excluded_volume(rcenter, base.EXCL_S2, base.EXCL_R2, base.EXCL_B2, base.EXCL_RC2)
-    
+
     # P-BASE vs. Q-BACK
     rcenter = q.pos_back - p.pos_base - diff
     energy += _excluded_volume(rcenter, base.EXCL_S3, base.EXCL_R3, base.EXCL_B3, base.EXCL_RC3)
-    
+
     # P-BACK vs. Q-BASE
     rcenter = q.pos_base - p.pos_back - diff
     energy += _excluded_volume(rcenter, base.EXCL_S4, base.EXCL_R4, base.EXCL_B4, base.EXCL_RC4)
-    
+
     if not nearest:
         # BACK-BACK
         rcenter = q.pos_back - p.pos_back - diff

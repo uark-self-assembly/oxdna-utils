@@ -10,7 +10,7 @@ import sys, os
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 
 def partition(s, d):
     if d in s:
@@ -492,7 +492,6 @@ class Nucleotide(Printable):
         else:
             r1 = self.get_pos_base()
             r2 = self.interactions[0]
-
 
 class Strand(Printable):
     """

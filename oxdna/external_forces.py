@@ -5,14 +5,14 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 
 class Trap:
     types = ['string','trap']
     def __init__ (self, type, particle = None, pos0 = np.array([0,0,0]), rate = 0., stiff = 0., dir=np.array([0,0,1]), F0=0.):
-        
+
         if type not in Trap.types:
             print("ERROR: cannot create trap with type=%s" % (type), file=sys.stderr)
             raise ValueError
@@ -32,12 +32,12 @@ class Trap:
     def get_pot (self, pos, time = 0.):
         if self.type == 'trap':
             dr = pos - self.pos0
-            return 1./2. * np.dot (dr, dr) * self.stiff 
+            return 1./2. * np.dot (dr, dr) * self.stiff
         elif self.type == 'string':
             return - (self.F0 + self.rate * time) * np.dot (self.dir, pos)
         else:
             pass
-    
+
     def get_force (self, pos, time = 0.):
         if self.type == 'trap':
             dr = pos - self.pos0
@@ -50,7 +50,7 @@ class Trap:
     def get_force_abs (self, pos):
         force = self.get_force (pos)
         return np.sqrt (np.dot (force, force))
-    
+
     def __str__ (self):
         if self.type == 'trap':
             return "TRAP: part=%i, stiff=%lf, pos0=(%g,%g,%g)" % (self.particle, self.stiff, self.pos0[0], self.pos0[1], self.pos0[2])
@@ -83,7 +83,7 @@ def parse_traps (inp = 'external.conf'):
         # remove empty lines
         if line == '\n':
             continue
-        
+
         stripped += line
 
     external.close ()
@@ -95,11 +95,11 @@ def parse_traps (inp = 'external.conf'):
 
         if i1 == -1 or i2 == -1:
             break
-        
+
         strtraps.append (stripped[i1 + 1:i2])
-        
+
         stripped = stripped[i2+1:]
-    
+
     myrate = myF0 = mydir = mypos0 = mytype = mystiff = None
     for s in strtraps:
         lines = s.split('\n')
@@ -122,11 +122,11 @@ def parse_traps (inp = 'external.conf'):
                     myF0 = float (words[1])
                 else:
                     pass
-         
+
         mytrap = Trap (mytype, particle=mypart, pos0=mypos0, rate=myrate, stiff=mystiff, F0=myF0, dir=mydir)
         base.Logger.log("Adding trap %s..." % (str(mytrap)), base.Logger.INFO)
         traps.append (mytrap)
-    
+
     return traps
 
 if __name__ == '__main__':
@@ -137,4 +137,3 @@ if __name__ == '__main__':
     print("## traps found:" )
     for t in traps:
         print(t)
-

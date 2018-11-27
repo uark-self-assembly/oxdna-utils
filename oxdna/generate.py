@@ -4,7 +4,7 @@ import sys, os
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import base
 import generators as gen
 

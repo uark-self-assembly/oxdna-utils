@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 import fileinput
@@ -46,7 +46,7 @@ for opt,arg in args:
     elif opt in('-s','seq_base_colour'):
         colour_by_seq=True
     else:
-        base.Logger.log("Option '%s' not recognised" %opt, base.Logger.INFO)    
+        base.Logger.log("Option '%s' not recognised" %opt, base.Logger.INFO)
 
 if domains == True:
     for i in range(len(s._strands)):
@@ -54,8 +54,8 @@ if domains == True:
         for j in range(len(s._strands[i]._nucleotides)):
             new.append(0)
         domain.append(new)
-        
-    
+
+
     fi = fileinput.FileInput([domain_file])
     try:
         for line in fi:
@@ -66,7 +66,7 @@ if domains == True:
             finalbid=int(d[2])
             domid=int(d[3])
             #print strandid, firstbid, finalbid, domid # WDEBUG    - Ben and Will fixed an error 29/05/12 - incorrect Logger syntax
-            #print len(s._strands) # WDEBUG 
+            #print len(s._strands) # WDEBUG
             if strandid >= len(s._strands):
                 base.Logger.log ("strand id %d is too large: domain ignored."%strandid, base.Logger.INFO)
             elif (firstbid <0 or firstbid>= len(s._strands[strandid]._nucleotides)):

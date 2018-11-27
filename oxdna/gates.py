@@ -4,7 +4,7 @@ import sys
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 from base import *
 from generators import *
 
@@ -58,4 +58,3 @@ for i in range (120):
 #s.renumber ()
 s.print_vmd_xyz_output ("pallinz.xyz", same_colors=True)
 s.print_lorenzo_output ("riprova.conf", "riprova.top")
-

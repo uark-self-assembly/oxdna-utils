@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 
@@ -21,7 +21,7 @@ fixcm = False
 if len(sys.argv) > 4:
     if sys.argv[4] == "fixcm":
         fixcm = True
-    
+
 l = readers.LorenzoReader(sys.argv[1], sys.argv[2])
 s = l.get_system()
 append = False
@@ -46,9 +46,8 @@ while s:
     append = True
     niter += 1
 
-            
+
 if niter < 2:
     base.Logger.log ("Dind't do anything...")
 else:
     base.Logger.log("Output printed on '%s'" % output, base.Logger.INFO)
-

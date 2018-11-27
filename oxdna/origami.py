@@ -2,7 +2,7 @@ import sys
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import base
 import generators as gen
 
@@ -41,7 +41,7 @@ for i in range (height):
 
             # start position of strand
             pos = [j * 16 * base.BASE_BASE, -i * (2. * base.RC2_BACK + base.CM_CENTER_DS + 0.01), 0]
-            
+
             # fix starting position if align = [-1, 0, 0]
             if align[0] < 0:
                 pos[0] += 16 * base.BASE_BASE;
@@ -90,6 +90,5 @@ for i in range (height):
 
 for n in strand._nucleotides:
     print(n.cm_pos_box)
-    
-s2.print_crepy_output ("ricaca.mgl", same_colors=False)
 
+s2.print_crepy_output ("ricaca.mgl", same_colors=False)

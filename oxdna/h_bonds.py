@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
-#A utility that prints out the number of hydrogen bonds between different strands in the system 
+#A utility that prints out the number of hydrogen bonds between different strands in the system
 
 import base
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
-import readers 
+import readers
 import subprocess
 import tempfile
 
@@ -22,7 +22,7 @@ if (len(sys.argv) < 3):
   sys.exit()
 
 
-  
+
 #now get topology file name:
 inputfile = sys.argv[1]
 conffile = sys.argv[2]
@@ -72,5 +72,3 @@ while mysystem != False:
 	mysystem.show_H_interactions()
 	counter += 1
 	mysystem = myreader.get_system()
-
-

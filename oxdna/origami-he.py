@@ -3,7 +3,7 @@ import sys
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import base
 import generators as gen
 import re
@@ -33,9 +33,9 @@ class vstrands (object):
         dr = DIST * (max(rows) - min(rows) + 2)
         dc = DIST * (max(cols) - min(cols) + 2)
         dl = 0.34 * (max(lens) + 2)
-        
+
         return 2*max([dr,dc,dl]) * BOX_FACTOR
-    
+
     def __str__ (self):
         a = '{\n"vstrands":[\n'
         if len(self.vhelices) > 0:
@@ -72,7 +72,7 @@ class vhelix (object):
         else:
             print("cannot add square that is not scaf or stap. Dying now", file=sys.stderr)
             sys.exit (-1)
-    
+
     def __str__ (self):
         a = '{\n'
 
@@ -89,14 +89,14 @@ class vhelix (object):
                 a = a + str(e) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"loop":['
         if len(self.loop) > 0:
             for e in self.loop:
                 a = a + str(e) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"stap_colors":['
         if len (self.stap_colors) > 0:
             for e in self.stap_colors:
@@ -107,21 +107,21 @@ class vhelix (object):
         a = a + '"row":' + str(self.row) + ',\n'
         a = a + '"col":' + str(self.col) + ',\n'
         a = a + '"num":' + str(self.num) + ',\n'
-        
+
         a = a + '"scafLoop":['
         if len(self.scafLoop) > 0:
             for i in self.scafLoop:
                 a = a + str(i) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"stap":['
         if len(self.stap) > 0:
             for i in self.stap:
                 a = a + str(i) + ','
             a = a[0:len(a)-1] # remove last comma
         a = a + '],\n'
-        
+
         a = a + '"scaf":['
         if len(self.scaf) > 0:
             for i in self.scaf:
@@ -144,22 +144,22 @@ def parse_cadnano (path):
     if not isinstance (path, str):
         print("must be a path. Aborting", file=sys.stderr)
         sys.exit (-1)
-    
+
     try:
         inp = open (path, 'r')
     except:
         print("Could not open", path, "Aborting now", file=sys.stderr)
         sys.exit (-1)
-    
+
     string = ''
     for line in inp.readlines ():
         string += line
     inp.close()
 
     string = string[1:len(string)-1] # remove the outer bracket par
-    
+
     ret = vstrands ()
-    
+
     while string.find('{') > 0:
         i = string.find('{')
         j = string.find('}')
@@ -180,9 +180,9 @@ def parse_helix (string):
         j = string.index ('}')
     except:
         j = len(string)
-    
+
     string = string[i:j].strip()
-    
+
     ret = vhelix ()
 
     lines = []
@@ -244,7 +244,7 @@ def parse_helix (string):
             ret.col = map(int, re.findall(r'(\d+)', line))[0]
         else:
             pass #print >> sys.stderr, "Unknown line... Passing"
-        
+
     return ret
 
 cadsys = parse_cadnano ('dummy.json')
@@ -254,7 +254,7 @@ vhelix_perp = np.array([1,0,0])
 R = get_rotation_matrix(vhelix_direction, np.pi*160./180)
 vhelix_perp = np.dot(R, vhelix_perp)
 g = gen.StrandGenerator ()
-slice_sys = base.System([side,side,side])            
+slice_sys = base.System([side,side,side])
 final_sys = base.System([side,side,side])
 strand_number = -1
 partner_list_scaf = []
@@ -289,7 +289,7 @@ for h in cadsys.vhelices:
         elif modi in (19,20):
             helix_angles[i] = 28.476 * np.pi/180
         else:
-            helix_angles[i] = 720./21 * (np.pi/180.) 
+            helix_angles[i] = 720./21 * (np.pi/180.)
 
     # make sure it's periodic
     sum = 0
@@ -348,7 +348,7 @@ for h in cadsys.vhelices:
                 else:
                     column = i
                 for j in range(len(partner_list_scaf)):
-                    
+
                     if [h.num, column] == partner_list_scaf[j]:
                         join_list_scaf[j].insert(0,strand_number)
                         found_partner = True
@@ -378,7 +378,7 @@ for h in cadsys.vhelices:
                     partner_list_scaf.append([s.V_0, s.b_0])
                 found_partner = False
             else:
-                base.Logger.log("unexpected square array", base.Logger.WARNING)                
+                base.Logger.log("unexpected square array", base.Logger.WARNING)
         i += 1
 
     # read the staple squares and add strands to slice_sys
@@ -415,7 +415,7 @@ for h in cadsys.vhelices:
                 else:
                     column = i
                 for j in range(len(partner_list_stap)):
-                    
+
                     if [h.num, column] == partner_list_stap[j]:
                         join_list_stap[j].insert(0,strand_number)
                         found_partner = True
@@ -445,7 +445,7 @@ for h in cadsys.vhelices:
                     partner_list_stap.append([s.V_0, s.b_0])
                 found_partner = False
             else:
-                base.Logger.log("unexpected square array", base.Logger.WARNING)                
+                base.Logger.log("unexpected square array", base.Logger.WARNING)
         i += 1
 
 join_lists = [join_list_scaf, join_list_stap]
@@ -490,7 +490,7 @@ for a in range(2):
                     break
                 elif join_list[i][0] == join_list[j][len(join_list[j]) - 1] and i == j:
                     base.Logger.log("circular strand detected - currently unsupported", base.Logger.WARNING)
-            
+
         if restart == False:
             all_are_joined = True
 
@@ -500,7 +500,7 @@ for a in range(2):
         for k in range(len(join) - 1):
             joined_strand = joined_strand.append(slice_sys._strands[join[k + 1]])
         final_sys.add_strand(joined_strand, check_overlap = False)
-        
+
 final_sys.print_lorenzo_output ("prova.conf", "prova.top")
 final_sys.print_vmd_xyz_output ('gino.xyz', same_colors=True)
 

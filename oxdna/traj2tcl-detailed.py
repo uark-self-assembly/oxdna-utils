@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 
@@ -37,7 +37,7 @@ while s:
     for strand in s._strands:
         diff = np.rint (strand.cm_pos / s._box ) * s._box
         s.translate (-diff)
-    
+
     # center of mass to 0
     if cdm20:
         # centre of mass of centre_strand to zero
@@ -61,11 +61,10 @@ while s:
             cdm = cdm / float (s.get_N_Nucleotides())
             for strand in s._strands:
                 strand.translate (-cdm)
-    
+
     s.print_tcl_detailed_output(output, visibility="caca.vis")
     s = l.get_system()
     append = True
     niter += 1
 
 base.Logger.log("Output printed on '%s'" % output, base.Logger.INFO)
-

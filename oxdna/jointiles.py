@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 import utils
@@ -53,7 +53,7 @@ for S in systems:
             for n in s._nucleotides:
                 cdm += n.cm_pos
         cdm = (1. / float(S.get_N_Nucleotides())) * cdm
-        S.translate (-cdm) 
+        S.translate (-cdm)
         #S._prepare(visibility=None)
         redo = False
 
@@ -80,7 +80,7 @@ for S in systems[1:]:
         translated.rotate(utils.get_random_rotation_matrix(), np.array([0.,0.,0.]))
         translated.translate(np.random.rand(3) * final._box)
         has_overlaps = False
-        
+
         for s1 in translated._strands:
             if final.is_overlapping_better(s1):
                 has_overlaps = True
@@ -94,7 +94,7 @@ for S in systems[1:]:
                     has_overlaps = True
                     base.Logger.log ("   # Overlap, retrying")
                     break'''
-		
+
 	#final = prova.copy()
 
     final = final.join(translated, final_box)

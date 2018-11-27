@@ -5,7 +5,7 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
 
@@ -34,7 +34,7 @@ while stmp:
             #print "###", i, j
             strands1 = s[i]._strands
             strands2 = s[j]._strands
-            
+
             #if len(strands1) != len(strands2):
             #    print >> sys.stdout, "## Disaster: different number of strands between confs. Aborting"
             #    sys.exit(-2)
@@ -48,7 +48,7 @@ while stmp:
                 msd[dt] += np.dot(dr,dr)
                 nmsd[dt] += 1
 
-    ''' 
+    '''
     # Now we work on the msd...
     for strand1 in stmp._strands:
         myindex = strand1.index
@@ -64,7 +64,7 @@ while stmp:
 
     # we append the configuration we just worked on
     s.append(stmp)
-    
+
     # try to get the next one from the trajectory.
     # if l.get_system() fails, the while cycle finishes
     stmp = l.get_system()
@@ -77,4 +77,3 @@ for i in range(1, block_size - 1):
 out.close ()
 
 print("All DONE", file=sys.stderr)
-

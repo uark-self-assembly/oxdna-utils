@@ -5,10 +5,10 @@ import readers
 try:
     import numpy as np
 except:
-    import mynumpy as np
+    print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 import os.path
 import sys
-import external_forces as forces 
+import external_forces as forces
 
 if len(sys.argv) < 3:
     base.Logger.log("Usage is %s configuration topology" % sys.argv[0], base.Logger.CRITICAL)
@@ -35,14 +35,14 @@ while s:
     first = s._strands[0]._nucleotides[0]
     second = s._strands[0]._nucleotides[1]
     last = s._strands[0]._nucleotides[-1]
-    
+
     r0N = first.distance (last, PBC=False)
     r01 = first.distance (second, PBC=False)
-    
+
     l0 += np.sqrt (np.dot (r01, r01))
     L2 += np.dot (r0N, r0N)
     Ll0 += np.dot (r01, r0N)
-    
+
     s = l.get_system()
     niter += 1
 
@@ -54,5 +54,3 @@ Pl = Ll0 / l0
 Kl = L2 / Lmax
 
 print(Pl, Kl, l0, L2, Ll0, "Pl, Kl, <l0>, <L2>, <L * l0>")
-
-

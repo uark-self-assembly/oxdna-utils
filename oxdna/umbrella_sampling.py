@@ -7,7 +7,7 @@ import time
 try:
 	import numpy as np
 except:
-	import mynumpy as np
+	print("error: no numpy installed. See requirements.txt", file=sys.stderr)
 
 # i assume that weights behave as follows:
 # w = Weights ( dict ), where dict has the form {'name', pointer_to_object}.
